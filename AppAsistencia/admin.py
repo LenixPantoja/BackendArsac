@@ -3,18 +3,24 @@ from AppAsistencia.models import Curso ,Horario, Materia, Periodo, Observaciones
 # Register your models here.
 @admin.register(Horario)
 class HorarioAdmin(admin.ModelAdmin):
-    list_display = ('tipoHorario', 'hora_inicio', 'hora_fin')
-    search_fields = ('tipoHorario',)
-
+    list_filter = ('tipoHorario', 'hora_inicio', 'hora_fin',)
+    list_display = ('tipoHorario', 'hora_inicio', 'hora_fin',)
+    search_fields = ('tipoHorario', 'hora_inicio', 'hora_fin',)
+    ordering = ('tipoHorario',)
+    
 @admin.register(Materia)
 class MateriaAdmin(admin.ModelAdmin):
-    list_display = ('nombre_materia', 'docente', 'horario')
-    search_fields = ('nombre_materia', 'docente__usuario__username')  
+    list_filter = ('nombre_materia', 'docente', 'horario',)
+    list_display = ('nombre_materia', 'docente', 'horario',)
+    search_fields = ('nombre_materia', 'docente__usuario__username',) 
+    ordering = ('nombre_materia',) 
 
 @admin.register(Periodo)
 class PeriodoAdmin(admin.ModelAdmin):
+    list_filter = ('nombre_periodo',)
     list_display = ('nombre_periodo',)
     search_fields = ('nombre_periodo',)
+    ordering = ('nombre_periodo',)
 
 @admin.register(Curso)
 class CursoAdmin(admin.ModelAdmin):
