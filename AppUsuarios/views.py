@@ -40,7 +40,6 @@ class AppUser_Login_ApiView(APIView):
           
 """ 
     Funcion que permite saber si el JWT fue aceptado
-
 """
 @api_view(["POST"])
 @permission_classes([permissions.IsAuthenticated])
