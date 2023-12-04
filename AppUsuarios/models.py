@@ -32,14 +32,14 @@ class Docente(models.Model):
      def __str__(self):
           return str(self.user.first_name + " " + self.user.last_name)
    
-class Estudiante(models.Model):
-     
+class Estudiante(models.Model): 
      user = models.OneToOneField(User, verbose_name="UsuarioEstudiante",on_delete=models.CASCADE)
      estudiante_fecha_matricula = models.DateField()
      estudiante_estado =models.BooleanField()
      estudiante_tipo_Id = models.CharField(max_length=10)
      estudiante_numero_Id = models.CharField(max_length=50)
      estudiante_fecha_nac = models.DateField()
+     curso = models.CharField(max_length=50)
      estudiante_created_at = models.DateTimeField(auto_now_add = True)
      estudiante_updated_at = models.DateTimeField(auto_now= True)
 
@@ -56,7 +56,7 @@ class Participante(models.Model):
      participante_estado =models.BooleanField()
      participante_tipo_Id = models.CharField(max_length=10)
      participante_numero_Id = models.CharField(max_length=50)
-     # participante_fecha_nac = models.DateField()
+     curso = models.CharField(max_length=50)
      participante_created_at = models.DateTimeField(auto_now_add = True)
      participante_updated_at = models.DateTimeField(auto_now= True)
 
@@ -66,3 +66,5 @@ class Participante(models.Model):
 
      def __str__(self):
           return str(self.user.first_name + " " + self.user.last_name)
+     
+     #24 +1 estuco
