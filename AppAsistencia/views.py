@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
@@ -32,6 +32,12 @@ class AppAsist_API_CrearHorario(APIView):
                return Response({'msg': 'Se ha creado el horario'})
           except Exception as e:
                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+          
+     def get(self, request, format=None):
+        # Obtener todos los horarios y serializarlos
+        horarios = Horario.objects.all()
+        serializer = HorarioSerializer(horarios, many=True)
+        return Response(serializer.data)
 
 class AppAsist_Api_CrearMateria(APIView):
      permission_classes = (permissions.IsAuthenticated,)
@@ -53,6 +59,12 @@ class AppAsist_Api_CrearMateria(APIView):
                     return Response({'msg': 'Se ha creado la materia'})
           except Exception as e:
                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+     
+     def get(self, request, format=None):
+        # Obtener todos los horarios y serializarlos
+        materias = Materia.objects.all()
+        serializer = MateriaSerializer(materias, many=True)
+        return Response(serializer.data)
           
 class AppAsist_API_CrearPeriodoAcadem(APIView):
      permission_classes = (permissions.IsAuthenticated,)
@@ -70,6 +82,12 @@ class AppAsist_API_CrearPeriodoAcadem(APIView):
                     return Response({'msg': 'Se ha creado la el periodo'})
           except Exception as e:
                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+     
+     def get(self, request, format=None):
+        # Obtener todos los horarios y serializarlos
+        periodos = Periodo.objects.all()
+        serializer = PeriodoSerializer(periodos, many=True)
+        return Response(serializer.data)
 
 class AppAsist_API_CrearCurso(APIView):
 
@@ -79,8 +97,8 @@ class AppAsist_API_CrearCurso(APIView):
                serializer = CursoSerializer(data = request.data)
                if(serializer.is_valid()):
                     dataCurso = request.data
-                    materia = Materia.objects.get(id=dataCurso["materia"])
-                    periodo = Periodo.objects.get(id=dataCurso["periodo"])
+                    materia = get_object_or_404(Materia, id=dataCurso["materia"])
+                    periodo = get_object_or_404(Periodo, id=dataCurso["periodo"])
 
                     curso = Curso(
                          nombre_curso = dataCurso["nombre_curso"],
@@ -93,8 +111,16 @@ class AppAsist_API_CrearCurso(APIView):
           except Exception as e:
                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
      
+     def get(self, request, format=None):
+        # Obtener todos los horarios y serializarlos
+        cursos = Curso.objects.all()
+        serializer = CursoSerializer(cursos, many=True)
+        return Response(serializer.data)
+     
+
 class AppAsist_API_CrearAsistenciaEst(APIView):
-     permission_classes =(permissions.IsAuthenticated,)
+
+     permission_classes = (permissions.IsAuthenticated,)
      def post(self, request, format =  None):
           try:
                serializer = AsistenciaEstudianteSerializer(data = request.data)
@@ -115,29 +141,13 @@ class AppAsist_API_CrearAsistenciaEst(APIView):
                return Response({'msg': 'Se ha creado la asistencia'})
           except Exception as e:
                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+     
+     def get(self, request, format=None):
+        # Obtener todos los horarios y serializarlos
+        asistenciaEst = AsistenciaEstudiante.objects.all()
+        serializer = AsistenciaEstudianteSerializer(asistenciaEst, many=True)
+        return Response(serializer.data)
 
-class AppAsist_API_CrearAsistenciaEst(APIView):
-     permission_classes =(permissions.IsAuthenticated,)
-     def post(self, request, format =  None):
-          try:
-               serializer = AsistenciaEstudianteSerializer(data = request.data)
-               if(serializer.is_valid()):
-                    dataAsisEstudiante = request.data
-                    estudiante = Estudiante.objects.get(id=dataAsisEstudiante["estudiante"])
-                    curso =  Curso.objects.get(id=dataAsisEstudiante["curso"])
-
-               asistenciaEstudiante= AsistenciaEstudiante(
-                    tipo_asistencia = dataAsisEstudiante["tipo_asistencia"],
-                    descripcion = dataAsisEstudiante["descripcion"],
-                    hora_llegada = dataAsisEstudiante["hora_llegada"],
-                    soporte = dataAsisEstudiante["soporte"],
-                    estudiante = estudiante,
-                    curso = curso
-               )
-               asistenciaEstudiante.save()
-               return Response({'msg': 'Asistencia del estudiante creada'})
-          except Exception as e:
-               return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class AppAsist_API_CrearAsistenciaPart(APIView):
      permission_classes =(permissions.IsAuthenticated,)
@@ -161,3 +171,9 @@ class AppAsist_API_CrearAsistenciaPart(APIView):
                     return Response({'msg': 'Asistencia del participante creada'})
           except Exception as e:
                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+     
+     def get(self, request, format=None):
+        # Obtener todos los horarios y serializarlos
+        asistenciaPart = AsistenciaParticipante.objects.all()
+        serializer = AsistenciaParticipanteSerializer(asistenciaPart, many=True)
+        return Response(serializer.data)

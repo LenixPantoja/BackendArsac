@@ -8,7 +8,7 @@ urlpatterns = [
     path('post/create/', views.create_post , name = 'creando-post'),
     # Api para obtener un token
     path('api/Login/', TokenObtainPairView.as_view(), name='loginTkn'),
-    # Api para actualizar el toke creado
+    # Api para actualizar el token creado
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),
     # Api para inicio de sesión en la aplicacion
     path('api/getUser/', AppUser_Login_ApiView.as_view(), name = 'get_User'),
