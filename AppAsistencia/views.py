@@ -196,22 +196,55 @@ class AppAsist_API_CrearAsistenciaPart(APIView):
         try:
             serializer = AsistenciaParticipanteSerializer(data=request.data)
             if serializer.is_valid():
-                dataAsisParticipante = request.data
-                participante = Participante.objects.get(
-                    id=dataAsisParticipante["participante"]
-                )
-                curso = Curso.objects.get(id=dataAsisParticipante["curso"])
+                pNumeroDocumento = request.query_params.get("pNumeroDocumento", None)
+                # Parametro de consulta
+                if pNumeroDocumento is None:
+                    return Response(
+                        {"error": "El parámetro pNumeroDocumento es necesario."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                # Verifica si el estudiante exite en la base de datos.
+                existing_participante = Participante.objects.filter(
+                    estudiante_numero_Id=pNumeroDocumento
+                ).first()
+                # Obtiene el curso de estudiante encontrado.
+                CursoParticipante = existing_participante.curso
+                # Veriica si el estudiante fue encontrado y si esta en el curso correcto.
 
-                asistenciaParticipante = AsistenciaParticipante(
-                    tipo_asistencia=dataAsisParticipante["tipo_asistencia"],
-                    descripcion=dataAsisParticipante["descripcion"],
-                    hora_llegada=dataAsisParticipante["hora_llegada"],
-                    soporte=dataAsisParticipante["soporte"],
-                    participante=participante,
-                    curso=curso,
-                )
-                asistenciaParticipante.save()
-                return Response({"msg": "Asistencia del participante creada"})
+                if CursoParticipante and CursoParticipante == request.data.get("curso"):
+                    dataParticipante = request.data
+                    # Obtiene el nombre del estudiante quien marcó la asistencia.
+                    nombreParticipante = (
+                        existing_participante.user.first_name
+                        + " "
+                        + existing_participante.user.last_name
+                    )
+                    participante = Participante.objects.get(
+                        id=dataParticipante["participante"]
+                    )
+                    curso = Curso.objects.get(id=dataParticipante["curso"])
+
+                    asistenciaParticipante = AsistenciaEstudiante(
+                        tipo_asistencia=dataParticipante["tipo_asistencia"],
+                        descripcion=dataParticipante["descripcion"],
+                        hora_llegada=dataParticipante["hora_llegada"],
+                        soporte=dataParticipante["soporte"],
+                        estudiante=participante,
+                        curso=curso,
+                    )
+                    asistenciaParticipante.save()
+                    return Response(
+                        {
+                            "msg": "Se ha creado la asistencia",
+                            "NombreEstudiante": nombreParticipante,
+                        }
+                    )
+                else:
+                    return Response(
+                        {
+                            "msg": "No se encontró el estudiante o el estudiante no pertenece a al curso seleccionado."
+                        }
+                    )
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
