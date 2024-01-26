@@ -123,7 +123,7 @@ class AppAsist_API_CrearCurso(APIView):
         return Response(serializer.data)
 
 
-class AppAsist_API_CrearAsistenciaEst(APIView):
+class AppAsist_API_AsistenciaEst(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request, format=None):
@@ -189,7 +189,7 @@ class AppAsist_API_CrearAsistenciaEst(APIView):
         return Response(serializer.data)
 
 
-class AppAsist_API_CrearAsistenciaPart(APIView):
+class AppAsist_API_AsistenciaPart(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request, format=None):

@@ -6,6 +6,6 @@ urlpatterns = [
     path('api/crearMateria/', AppAsist_Api_CrearMateria.as_view(), name = 'crearMateria'),
     path('api/crearPeriodo/', AppAsist_API_CrearPeriodoAcadem.as_view(), name='crearPeriodo'),
     path('api/crearCurso/', AppAsist_API_CrearCurso.as_view(), name='crearCurso'),
-    path('api/crearAsistenciaEst/', AppAsist_API_CrearAsistenciaEst.as_view(), name= "crearAsistenciaEst"),
-    path('api/crearAsistenciaPart/', AppAsist_API_CrearAsistenciaPart.as_view(), name = "crearAsistenciaPart")
+    path('api/AsistenciaEstudiante/', AppAsist_API_AsistenciaEst.as_view(), name= "crearAsistenciaEst"),
+    path('api/AsistenciaParticipante/', AppAsist_API_AsistenciaPart.as_view(), name = "AsistenciaParticipante")
 ]
