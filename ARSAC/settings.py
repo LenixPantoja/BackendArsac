@@ -56,7 +56,7 @@ REST_FRAMEWORK = {
 }
 # Dictionary for define time of caducing
 SIMPLE_JWT = {
-     'ACCESS_TOKEN_LIFETIME':timedelta(minutes=10)
+     'ACCESS_TOKEN_LIFETIME':timedelta(minutes=60)
 }
 
 MIDDLEWARE = [

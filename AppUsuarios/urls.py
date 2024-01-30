@@ -13,5 +13,10 @@ urlpatterns = [
     # Api para inicio de sesión en la aplicacion
     path('api/getUser/', AppUser_Login_ApiView.as_view(), name = 'get_User'),
     # Api para crear docentes
-    path('api/v1/crearDocente/', AppUser_Docente_ApiView.as_view(), name = 'crear-docente'),
+    path('api/Docente/', AppUser_Docente_ApiView.as_view(), name = 'Api-docente'),
+    # Api para crear, obtener, eliminar estudiantes
+    path('api/Estudiantes', AppUser_Estudiante_ApiView.as_view(), name = 'Api-Estudiantes'),
+    # Api para crear, obtener, eliminar participantes
+    path('api/Participante', AppUser_Participante_ApiView.as_view(), name = 'Api-Estudiantes')
+
 ]

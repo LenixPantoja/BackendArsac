@@ -58,6 +58,7 @@ class Estudiante(models.Model):
 
     def __str__(self):
         return str(self.user.first_name)
+    
 
 
 class Participante(models.Model):
