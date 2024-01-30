@@ -13,7 +13,8 @@ from AppUsuarios.serializers import *
 
 # Importamos los views de App Usuarios
 from AppUsuarios.models import *
-
+#Importamos los views de App Asistencia
+from AppAsistencia.models import *
 # Librerias para JWT
 from django.http import JsonResponse
 from rest_framework import permissions, status
@@ -52,10 +53,9 @@ def create_post(request):
 
 """
     @Class AppUser_ApiView
-    y el método POST que permitirá guardar registros en la base de datos. 
+    y el método POST que permitirá guardar registros en la base de datos.
+    metodo GET que permitirá obtener la lista de docentes de la base de datos. 
 """
-
-
 class AppUser_Docente_ApiView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
@@ -66,7 +66,6 @@ class AppUser_Docente_ApiView(APIView):
 
         if user_serializer.is_valid():
             user = user_serializer.save()
-
             # Asignar el usuario al docente
             docente_data = {
                 "user": user.id,
@@ -77,12 +76,80 @@ class AppUser_Docente_ApiView(APIView):
                 "docente_fecha_nacim": request.data["docente_fecha_nacim"],
             }
             docente_serializer = DocenteSerializers(data=docente_data)
-
             if docente_serializer.is_valid():
                 docente_serializer.save()
                 return Response(docente_serializer.data, status=status.HTTP_201_CREATED)
             return Response(
                 docente_serializer.errors, status=status.HTTP_400_BAD_REQUEST
             )
-
         return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+# Metodo get que permite 
+    def get(self, request, format=None):
+        try:
+             # Obtener la lista de todos los docentes
+            docentes = Docente.objects.all()
+            serializer = DocenteSerializers(docentes, many=True)
+            
+            # Crear una lista de diccionarios con claves y valores
+            docentes_data = []
+            for data_dict in serializer.data:
+                docente_info = {f"{key}": value for key, value in data_dict.items()}
+                user = User.objects.get(id=docente_info['user'])
+                profesion = Profesion.objects.get(id=docente_info['docente_profesion'])
+                docentes_data.append({
+                    'id': docente_info['id'],
+                    'UsernameLogin': user.username,
+                    'Nombre_docente': user.first_name + " " + user.last_name,
+                    'Cedula_docente': docente_info['docente_numero_Id'],
+                    'Profesion_docente': profesion.nombre_Profesion
+                })
+            return Response(docentes_data)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class AppUser_Estudiante_ApiView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    # Obtiene la lista de todos los estudiantes
+    def get(self, request, format=None):
+        try:
+            estudiantes = Estudiante.objects.all()
+            serializer = EstudianteSerializers(estudiantes, many=True)
+            estudiantes_data = []
+            for data_dict in serializer.data:
+                estudiante_info = {f"{key}": value for key, value in data_dict.items()}
+                user = User.objects.get(id = estudiante_info['user'])
+                curso = Curso.objects.get(id = estudiante_info['curso'])
+                estudiantes_data.append({
+                        'id': estudiante_info['id'],
+                        'UsernameLogin': user.username,
+                        'Nombre_estudiante': user.first_name + " " + user.last_name,
+                        'Identificacion_estudiante': estudiante_info['estudiante_numero_Id'],
+                        'Curso': curso.nombre_curso
+                    })
+            return Response(estudiantes_data)    
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+class AppUser_Participante_ApiView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    # Obtiene la lista de todos los estudiantes
+    def get(self, request, format=None):
+        participante = Participante.objects.all()
+        serializer = ParticipanteSerializers(participante, many=True)
+        participante_data = []
+
+        for data_dict in serializer.data:
+            participante_info = {f"{key}": value for key, value in data_dict.items()}
+            user = User.objects.get(id = participante_info['user'])
+            curso = Curso.objects.get(id = participante_info['curso'])
+            participante_data.append({
+                'id': participante_info['id'],
+                'Username_Login': user.username,
+                'Nombre_estudiante': user.first_name + " " + user.last_name,
+                'Identificacion': participante_info['participante_numero_Id'],
+                'Curso': curso.nombre_curso
+            })
+        return Response(participante_data)
+          
