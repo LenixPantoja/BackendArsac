@@ -143,9 +143,25 @@ class AppAsist_API_AsistenciaEst(APIView):
                 ).first()
                 # Obtiene el curso de estudiante encontrado.
                 CursoEstudinte = existing_estudiante.curso
-                # Veriica si el estudiante fue encontrado y si esta en el curso correcto.
-
-                if existing_estudiante and CursoEstudinte == request.data.get("curso"):
+                QuerySetCurso1 = Curso.objects.filter(id=CursoEstudinte)
+                nombreCurso1 = ""
+                # Obtenemos el nombre del curso del estudiante que esta en la lista
+                for i in QuerySetCurso1:
+                    nombreCurso1 = i
+                
+                idCurso = request.data.get("curso")
+                QuerySetCurso2 = Curso.objects.filter(id= idCurso)
+                nombreCurso2= ""
+                for j in QuerySetCurso2:
+                    nombreCurso2 = j
+                
+                print(existing_estudiante)
+                print(type(nombreCurso1))
+                print(type(nombreCurso2))
+                # Verifica si el estudiante fue encontrado y si esta en el curso correcto.
+                if existing_estudiante and str(nombreCurso1) == str(nombreCurso2):
+                #if existing_estudiante and CursoEstudinte == request.data.get("curso"):
+                
                     dataAsisEstudiante = request.data
                     # Obtiene el nombre del estudiante quien marcó la asistencia.
                     nombreEstudiante = (
@@ -186,7 +202,23 @@ class AppAsist_API_AsistenciaEst(APIView):
         # Obtener todas las asistencias y serializarlos
         asistenciaEst = AsistenciaEstudiante.objects.all()
         serializer = AsistenciaEstudianteSerializer(asistenciaEst, many=True)
-        return Response(serializer.data)
+        asistencia_data = []
+        for data_dict in serializer.data:
+            asistencia_info = {f"{key}": value for key, value in data_dict.items()}
+            estudiante_user = User.objects.get(id = asistencia_info['estudiante'])
+            curso = Curso.objects.get( id = asistencia_info['curso'])
+            print(curso.materia)
+            asistencia_data.append({
+                'id': asistencia_info['id'],
+                'Tipo_asistencia':asistencia_info['tipo_asistencia'],
+                'Descripcion_asistencia': asistencia_info['descripcion'],
+                'Hora_llegada': asistencia_info['hora_llegada'],
+                'Soporte_imagen': asistencia_info['soporte'],
+                'Estudiante': estudiante_user.first_name + " " + estudiante_user.last_name,
+                'Curso': curso.nombre_curso,
+                'Materia': curso.materia.nombre_materia
+            })
+        return Response(asistencia_data)
 
 
 class AppAsist_API_AsistenciaPart(APIView):
