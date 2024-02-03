@@ -136,20 +136,23 @@ class AppUser_Participante_ApiView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
     # Obtiene la lista de todos los estudiantes
     def get(self, request, format=None):
-        participante = Participante.objects.all()
-        serializer = ParticipanteSerializers(participante, many=True)
-        participante_data = []
 
-        for data_dict in serializer.data:
-            participante_info = {f"{key}": value for key, value in data_dict.items()}
-            user = User.objects.get(id = participante_info['user'])
-            curso = Curso.objects.get(id = participante_info['curso'])
-            participante_data.append({
-                'id': participante_info['id'],
-                'Username_Login': user.username,
-                'Nombre_estudiante': user.first_name + " " + user.last_name,
-                'Identificacion': participante_info['participante_numero_Id'],
-                'Curso': curso.nombre_curso
-            })
-        return Response(participante_data)
+        try:
+            participante = Participante.objects.all()
+            serializer = ParticipanteSerializers(participante, many=True)
+            participante_data = []
+            for data_dict in serializer.data:
+                participante_info = {f"{key}": value for key, value in data_dict.items()}
+                user = User.objects.get(id = participante_info['user'])
+                curso = Curso.objects.get(id = participante_info['curso'])
+                participante_data.append({
+                    'id': participante_info['id'],
+                    'Username_Login': user.username,
+                    'Nombre_estudiante': user.first_name + " " + user.last_name,
+                    'Identificacion': participante_info['participante_numero_Id'],
+                    'Curso': curso.nombre_curso
+                })
+            return Response(participante_data)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
           
