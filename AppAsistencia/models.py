@@ -14,7 +14,7 @@ class Horario(models.Model):
         verbose_name_plural = "Horarios"
 
     def __str__(self):
-        return str(self.tipoHorario)
+        return str(f"{self.tipoHorario} - {self.hora_inicio} - {self.hora_fin}")
 
 
 class Materia(models.Model):
