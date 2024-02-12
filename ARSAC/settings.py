@@ -56,7 +56,7 @@ REST_FRAMEWORK = {
 }
 # Dictionary for define time of caducing
 SIMPLE_JWT = {
-     'ACCESS_TOKEN_LIFETIME':timedelta(minutes=60)
+     'ACCESS_TOKEN_LIFETIME':timedelta(minutes=1200)
 }
 
 MIDDLEWARE = [
@@ -137,7 +137,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 """ Accede,ps a la ruta por medio la carpeta archivos, ruta media """
-MEDIA_URL = '/archivos/'
+MEDIA_URL = 'media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
