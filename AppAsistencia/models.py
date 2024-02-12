@@ -97,8 +97,8 @@ class AsistenciaParticipante(models.Model):
 
 
 class ObservacionesEstudiante(models.Model):
-    observacionEst = models.TextField()
     asistenciaEst = models.ForeignKey(AsistenciaEstudiante, on_delete=models.CASCADE)
+    observacionEst = models.TextField()
     observacion_created_at = models.DateTimeField(auto_now_add=True)
     observacion_updated_at = models.DateTimeField(auto_now=True)
 
@@ -117,8 +117,8 @@ class ObservacionParticipantes(models.Model):
     observacion_updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = "ObservacionEstudiante"
-        verbose_name_plural = "ObservacionesEstudiantes"
+        verbose_name = "ObservacionParticipante"
+        verbose_name_plural = "ObservacionesParticipantes"
 
     def __str__(self):
         return str(self.observacionPart)
