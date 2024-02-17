@@ -354,7 +354,7 @@ class AppAsist_API_AsistenciaPart(APIView):
         return Response(asistencia_data)
 
 class AppAsist_API_ObservacionesEstudiante(APIView):
-
+    permission_classes = (permissions.IsAuthenticated,)
     def post(self, request, format=None):
         try:
             serializer = ObservacionesEstSerializer(data=request.data)
@@ -365,7 +365,7 @@ class AppAsist_API_ObservacionesEstudiante(APIView):
                 # Guardamos el ID de la asistencia
                 id_asistencia_estudiante = AsistenciaEstudiante.objects.get(pk=asistencia_estudiante_id)
                 nombre_estudiante = id_asistencia_estudiante.estudiante.user.first_name + " " + id_asistencia_estudiante.estudiante.user.last_name
-
+                # Creamos un objeto de tipo ObservacionEstudiante
                 obervacion_estudiante = ObservacionesEstudiante(
                     asistenciaEst = id_asistencia_estudiante,
                     observacionEst = data_observaciones["observacionEst"]
@@ -380,3 +380,118 @@ class AppAsist_API_ObservacionesEstudiante(APIView):
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+    def get(self, request, format=None):
+        observacionesEstudiante = ObservacionesEstudiante.objects.all()
+        serializer =  ObservacionesEstSerializer(observacionesEstudiante, many =  True)
+
+        return Response(serializer.data)
+    
+class AppAsist_API_ObservacionesEstudiante(APIView):
+
+    permission_classes = (permissions.IsAuthenticated,)
+    def post(self, request, format=None):
+        try:
+            serializer = ObservacionesEstSerializer(data=request.data)
+            if serializer.is_valid():
+                data_observaciones = request.data
+                # Obtener la instancia de AsistenciaEstudiante utilizando el ID proporcionado
+                asistencia_estudiante_id = data_observaciones.get("asistenciaEst")
+                # Guardamos el ID de la asistencia
+                id_asistencia_estudiante = AsistenciaEstudiante.objects.get(pk=asistencia_estudiante_id)
+                nombre_estudiante = id_asistencia_estudiante.estudiante.user.first_name + " " + id_asistencia_estudiante.estudiante.user.last_name
+                # Creamos un objeto de tipo ObservacionEstudiante
+                obervacion_estudiante = ObservacionesEstudiante(
+                    asistenciaEst = id_asistencia_estudiante,
+                    observacionEst = data_observaciones["observacionEst"]
+                )
+                obervacion_estudiante.save()
+                return Response(
+                        {
+                            "msg": f"Se creo la observación del estudiante: {nombre_estudiante}"
+                        }
+                    )
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+    def get(self, request, format=None):
+        lista_observaciones = []
+        observacionesEstudiante = ObservacionesEstudiante.objects.all()
+        serializer =  ObservacionesEstSerializer(observacionesEstudiante, many =  True)
+        data_observaciones = request.data
+        id_asistencia =  data_observaciones.get("asistenciaEst")
+        query_Set_Asistencia = AsistenciaEstudiante.objects.filter(id = id_asistencia)
+
+        for data_dict in serializer.data:
+            observacion_info = {f"{key}": value for key, value in data_dict.items()}
+            for data_Asistencia in query_Set_Asistencia:
+                pass
+            lista_observaciones.append({
+                "id": observacion_info["id"],
+                "id_asistencia": id_asistencia,
+                "Descripcion": observacion_info["observacionEst"],
+                "Curso": data_Asistencia.curso.nombre_curso,
+                "Periodo": data_Asistencia.curso.periodo.nombre_periodo,
+                "Estudiante": data_Asistencia.estudiante.user.first_name + " " + data_Asistencia.estudiante.user.last_name,
+                "Materia": data_Asistencia.curso.materia.nombre_materia,
+                "Docente": data_Asistencia.curso.materia.docente.user.first_name + " " + data_Asistencia.curso.materia.docente.user.last_name
+                })
+        
+        return Response(lista_observaciones)
+
+class AppAsist_API_ObservacionesParticipante(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    def post(self, request, format=None):
+        try:
+            serializer = ObservacionesPartSerializer(data=request.data)
+            if serializer.is_valid():
+                data_observaciones = request.data
+                # Obtener la instancia de AsistenciaParticipante utilizando el ID proporcionado
+                asistencia_participante = data_observaciones.get("asistenciaPart")
+                # Guardamos el ID de la asistencia
+                id_asistencia_participante = AsistenciaParticipante.objects.get(pk=asistencia_participante)
+                # Guardamos en la variable el nombre del participante
+                nombre_participante = id_asistencia_participante.participante.user.first_name + " " + id_asistencia_participante.participante.user.last_name
+                # Creamos un objeto de tipo ObservacionEstudiante
+                obervacion_participante = ObservacionParticipantes(
+                    asistenciaPart = id_asistencia_participante,
+                    observacionPart = data_observaciones["observacionPart"]
+                )
+                obervacion_participante.save()
+                return Response(
+                        {
+                            "msg": f"Se creo la observación del participante: {nombre_participante}"
+                        }
+                    )
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+    def get(self, request, format=None):
+        lista_observaciones = []
+        observacionesParticipante = ObservacionParticipantes.objects.all()
+        serializer =  ObservacionesPartSerializer(observacionesParticipante, many=True)
+        data_observaciones = request.data
+        id_asistencia =  data_observaciones.get("asistenciaPart")
+        query_Set_Asistencia = AsistenciaParticipante.objects.filter(id = id_asistencia)
+
+        for data_dict in serializer.data:
+            observacion_info = {f"{key}": value for key, value in data_dict.items()}
+            for data_Asistencia in query_Set_Asistencia:
+                pass
+            lista_observaciones.append({
+                "id": observacion_info["id"],
+                "id_asistencia": id_asistencia,
+                "Descripcion": observacion_info["observacionPart"],
+                "Curso": data_Asistencia.curso.nombre_curso,
+                "Periodo": data_Asistencia.curso.periodo.nombre_periodo,
+                "Participante": data_Asistencia.participante.user.first_name + " " + 
+                                data_Asistencia.participante.user.last_name,
+                "Materia": data_Asistencia.curso.materia.nombre_materia,
+                "Docente": data_Asistencia.curso.materia.docente.user.first_name + " " + 
+                           data_Asistencia.curso.materia.docente.user.last_name
+                })
+        return Response(lista_observaciones)

@@ -109,7 +109,6 @@ class ObservacionesEstudiante(models.Model):
     def __str__(self):
         return str(self.observacionEst)
 
-
 class ObservacionParticipantes(models.Model):
     observacionPart = models.TextField()
     asistenciaPart = models.ForeignKey(AsistenciaParticipante, on_delete=models.CASCADE)
