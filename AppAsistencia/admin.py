@@ -36,7 +36,6 @@ class AsistenciaEstudianteAdmin(admin.ModelAdmin):
     search_fields = ('estudiante__usuario__username', 'curso__nombre_curso')
     date_hierarchy = 'asistenciaEst_created_at'
 
-
 @admin.register(AsistenciaParticipante)
 class AsistenciaParticipanteAdmin(admin.ModelAdmin):
     list_display = ('tipo_asistencia', 'participante', 'curso', 'hora_llegada', 'asistenciaPart_created_at')
