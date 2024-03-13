@@ -110,25 +110,43 @@ class AppUser_Docente_ApiView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class AppUser_Estudiante_ApiView(APIView):
+    
     permission_classes = (permissions.IsAuthenticated,)
-    # Obtiene la lista de todos los estudiantes
-    def get(self, request, format=None):
+    
+    def get(self, request, estudiante_numero_Id=None, format=None):
         try:
-            estudiantes = Estudiante.objects.all()
-            serializer = EstudianteSerializers(estudiantes, many=True)
-            estudiantes_data = []
-            for data_dict in serializer.data:
-                estudiante_info = {f"{key}": value for key, value in data_dict.items()}
-                user = User.objects.get(id = estudiante_info['user'])
-                curso = Curso.objects.get(id = estudiante_info['curso'])
-                estudiantes_data.append({
+            if estudiante_numero_Id:
+                estudiante = Estudiante.objects.get(estudiante_numero_Id=estudiante_numero_Id)
+                serializer = EstudianteSerializers(estudiante)
+                estudiante_data = serializer.data
+                user = User.objects.get(id=estudiante_data['user'])
+                curso = Curso.objects.get(id=estudiante_data['curso'])
+                response_data = {
+                    'id': estudiante_data['id'],
+                    'UsernameLogin': user.username,
+                    'Nombre_estudiante': user.first_name + " " + user.last_name,
+                    'Identificacion_estudiante': estudiante_data['estudiante_numero_Id'],
+                    'Curso': curso.nombre_curso
+                }
+                return Response(response_data)
+            else:
+                estudiantes = Estudiante.objects.all()
+                serializer = EstudianteSerializers(estudiantes, many=True)
+                estudiantes_data = []
+                for data_dict in serializer.data:
+                    estudiante_info = {f"{key}": value for key, value in data_dict.items()}
+                    user = User.objects.get(id=estudiante_info['user'])
+                    curso = Curso.objects.get(id=estudiante_info['curso'])
+                    estudiantes_data.append({
                         'id': estudiante_info['id'],
                         'UsernameLogin': user.username,
                         'Nombre_estudiante': user.first_name + " " + user.last_name,
                         'Identificacion_estudiante': estudiante_info['estudiante_numero_Id'],
                         'Curso': curso.nombre_curso
                     })
-            return Response(estudiantes_data)    
+                return Response(estudiantes_data)    
+        except Estudiante.DoesNotExist:
+            return Response({"error": "Estudiante no encontrado"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
