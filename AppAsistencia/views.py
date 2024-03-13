@@ -200,7 +200,7 @@ class AppAsist_API_AsistenciaEst(APIView):
                 for j in QuerySetCurso2:
                     nombreCurso2 = j
                 
-                print(existing_estudiante)
+                print(existing_estudiante.estudiante_numero_Id)
                 print(type(nombreCurso1))
                 print(type(nombreCurso2))
                 # Verifica si el estudiante fue encontrado y si esta en el curso correcto.
@@ -231,7 +231,7 @@ class AppAsist_API_AsistenciaEst(APIView):
                     return Response(
                         {
                             "msg": "Se ha creado la asistencia",
-                            "NombreEstudiante": nombreEstudiante,
+                            "NombreEstudiante": estudiante.user.first_name + " " + estudiante.user.last_name
                         }
                     )
                 else:
@@ -440,6 +440,29 @@ class AppAsist_API_ObservacionesEstudiante(APIView):
                 })
         
         return Response(lista_observaciones)
+    
+    def delete(self, request, pk, format=None):
+        try:
+            observacion_estudiante = ObservacionesEstudiante.objects.get(pk=pk)
+            observacion_estudiante.delete()
+            return Response({"msg": "Observación eliminada correctamente"})
+        except ObservacionesEstudiante.DoesNotExist:
+            return Response({"error": "La observación no existe"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, pk, format=None):
+        try:
+            observacion_estudiante = ObservacionesEstudiante.objects.get(pk=pk)
+            serializer = ObservacionesEstSerializer(observacion_estudiante, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except ObservacionesEstudiante.DoesNotExist:
+            return Response({"error": "La observación no existe"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class AppAsist_API_ObservacionesParticipante(APIView):
     permission_classes = (permissions.IsAuthenticated,)
@@ -495,3 +518,35 @@ class AppAsist_API_ObservacionesParticipante(APIView):
                            data_Asistencia.curso.materia.docente.user.last_name
                 })
         return Response(lista_observaciones)
+    
+class AppAsist_API_HorarioDocente(APIView):
+    def get(self, request, format=None):
+        try:
+            materia = Materia.objects.all()
+            serializer = MateriaSerializer(materia, many = True)
+            horarioDocente = []
+            
+            pUser = request.query_params.get("pUser", None)
+                # Parametro de consulta
+            if pUser is None:
+                return Response(
+                    {"error": "El parámetro pUser es necesario."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+            
+            for dataMateria in serializer.data:
+                pass
+                miDocente = Docente.objects.get(id = dataMateria["docente"])
+                miHorario =  Horario.objects.get(id = dataMateria["horario"])
+                
+                if pUser == str(miDocente.user.username):
+                    horarioDocente.append({
+                    "Docente": miDocente.user.first_name + " " + miDocente.user.last_name,
+                    "Materia": dataMateria["nombre_materia"],
+                    "Hora_inicio": miHorario.hora_inicio,
+                    "Hora_fin": miHorario.hora_fin
+                    })
+                    print(horarioDocente)
+            return Response(horarioDocente)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
