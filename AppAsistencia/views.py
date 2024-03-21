@@ -550,3 +550,33 @@ class AppAsist_API_HorarioDocente(APIView):
             return Response(horarioDocente)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class AppAsist_API_Materias_Docente(APIView):
+    def get(self, request, format=None):
+        try:
+            materia = Materia.objects.all()
+            serializer = MateriaSerializer(materia, many = True)
+            horarioDocente = []
+            
+            pUser = request.query_params.get("pUser", None)
+                # Parametro de consulta
+            if pUser is None:
+                return Response(
+                    {"error": "El parámetro pUser es necesario."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+            
+            for dataMateria in serializer.data:
+                pass
+                miDocente = Docente.objects.get(id = dataMateria["docente"])
+                miHorario =  Horario.objects.get(id = dataMateria["horario"])
+                
+                if pUser == str(miDocente.user.username):
+                    horarioDocente.append({
+                    "id" : dataMateria["id"],
+                    "Materia": dataMateria["nombre_materia"]
+                    })
+                    print(horarioDocente)
+            return Response(horarioDocente)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
