@@ -32,6 +32,7 @@ urlpatterns = [
    path('api/ObservacionesEstudiante/<int:pk>/', AppAsist_API_ObservacionesEstudiante.as_view(), name='observacion_estudiante_detail'),
    path('api/ObservacionesParticipante/', AppAsist_API_ObservacionesParticipante.as_view(), name = "ObservacionParticipante"),
    path('api/HorarioDocente/', AppAsist_API_HorarioDocente.as_view(), name = "HorarioDocente"),
+   path('api/MateriasDocente/', AppAsist_API_Materias_Docente.as_view(), name = "MateriasDocente"),
    path('swagger<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
    path('', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
