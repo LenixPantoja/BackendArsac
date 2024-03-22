@@ -31,11 +31,11 @@ class AppUser_Login_ApiView(APIView):
             # Obtenemos el usuario autenticado
             user = request.user
 
-            # Serializamos el usuario para obtener el nombre de usuario
-            serializer = UsuariosSerializers(user)
+            # Serializamos el usuario para obtener el nombre de usuario y el nombre completo
+            serializer = UserSerializer(user)
 
-            # Devolvemos el nombre de usuario como respuesta
-            return Response({"username": serializer.data["username"]})
+            # Devolvemos la información del usuario como respuesta
+            return Response(serializer.data)
         else:
             return Response({"detail": "El usuario no está autenticado"}, status=401)
 
