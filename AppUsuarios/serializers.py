@@ -2,6 +2,14 @@ from rest_framework import serializers
 from .models import Docente, Profesion, Estudiante, Participante
 from django.contrib.auth.models import User
 
+
+class UserSerializer(serializers.ModelSerializer):
+    full_name = serializers.CharField(source='get_full_name', read_only=True)
+
+    class Meta:
+        model = User
+        fields = ['username', 'full_name']
+
 """ Clase serializable de Profesion """
 class ProfesionSerializers(serializers.ModelSerializer):
     class Meta:
