@@ -92,7 +92,7 @@ class AppUser_Docente_ApiView(APIView):
             docentes = Docente.objects.all()
             serializer = DocenteSerializers(docentes, many=True)
             
-            # Crear una lista de diccionarios con claves y valores
+            # Crear una lista de diccionarios con claves y valores.
             docentes_data = []
             for data_dict in serializer.data:
                 docente_info = {f"{key}": value for key, value in data_dict.items()}
