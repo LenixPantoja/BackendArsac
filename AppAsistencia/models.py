@@ -1,5 +1,5 @@
 from django.db import models
-from AppUsuarios.models import Docente, Estudiante, Participante
+from AppUsuarios.models import Docente, Estudiante
 
 # Create your models here.
 
@@ -53,7 +53,20 @@ class Curso(models.Model):
         verbose_name_plural = "Cursos"
 
     def __str__(self):
-        return str(self.nombre_curso)
+        return str(self.nombre_curso + " | " + self.materia.nombre_materia)
+
+class Matricula(models.Model):
+    estudiante = models.ForeignKey(Estudiante, on_delete=models.CASCADE)
+    curso = models.ForeignKey(Curso, on_delete=models.CASCADE)
+    matricula_created_at = models.DateTimeField(auto_now_add=True)
+    matricula_updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "MatriculaEstudiante"
+        verbose_name_plural = "MatriculasEstudiante"
+
+    def __str__(self):
+        return str(self.estudiante.user.first_name +" "+self.estudiante.user.last_name + " | " + self.curso.materia.nombre_materia)
 
 
 class AsistenciaEstudiante(models.Model):
@@ -63,34 +76,13 @@ class AsistenciaEstudiante(models.Model):
     soporte = models.ImageField(
         upload_to="imageSoportes/", null=True, default="Sin registro"
     )
-    estudiante = models.ForeignKey(Estudiante, on_delete=models.CASCADE)
-    curso = models.ForeignKey(Curso, on_delete=models.CASCADE)
+    matricula_estudiante = models.ForeignKey(Matricula, on_delete=models.CASCADE)
     asistenciaEst_created_at = models.DateTimeField(auto_now_add=True)
     asistenciaEst_updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = "AsistenciaEstudiante"
         verbose_name_plural = "AsistenciaEstudiantes"
-
-    def __str__(self):
-        return str(self.tipo_asistencia)
-
-
-class AsistenciaParticipante(models.Model):
-    tipo_asistencia = models.CharField(max_length=100)
-    descripcion = models.TextField(null=True, default="Sin registro")
-    hora_llegada = models.DateTimeField()
-    soporte = models.ImageField(
-        upload_to="imagenes/", null=True, default="Sin registro"
-    )
-    participante = models.ForeignKey(Participante, on_delete=models.CASCADE)
-    curso = models.ForeignKey(Curso, on_delete=models.CASCADE)
-    asistenciaPart_created_at = models.DateTimeField(auto_now_add=True)
-    asistenciaPart_updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = "AsistenciaParticipante"
-        verbose_name_plural = "AsistenciaParticipantes"
 
     def __str__(self):
         return str(self.tipo_asistencia)
@@ -109,15 +101,4 @@ class ObservacionesEstudiante(models.Model):
     def __str__(self):
         return str(self.observacionEst)
 
-class ObservacionParticipantes(models.Model):
-    observacionPart = models.TextField()
-    asistenciaPart = models.ForeignKey(AsistenciaParticipante, on_delete=models.CASCADE)
-    observacion_created_at = models.DateTimeField(auto_now_add=True)
-    observacion_updated_at = models.DateTimeField(auto_now=True)
 
-    class Meta:
-        verbose_name = "ObservacionParticipante"
-        verbose_name_plural = "ObservacionesParticipantes"
-
-    def __str__(self):
-        return str(self.observacionPart)

@@ -10,7 +10,7 @@ from rest_framework import viewsets
 
 # Importamos los serializadores de App Usuarios
 from AppUsuarios.serializers import *
-
+from AppAsistencia.serializers import *
 # Importamos los views de App Usuarios
 from AppUsuarios.models import *
 #Importamos los views de App Asistencia
@@ -103,7 +103,8 @@ class AppUser_Docente_ApiView(APIView):
                     'UsernameLogin': user.username,
                     'Nombre_docente': user.first_name + " " + user.last_name,
                     'Cedula_docente': docente_info['docente_numero_Id'],
-                    'Profesion_docente': profesion.nombre_Profesion
+                    'Profesion_docente': profesion.nombre_Profesion,
+                    'Acceso': docente_info['docente_estado']
                 })
             return Response(docentes_data)
         except Exception as e:
@@ -115,62 +116,61 @@ class AppUser_Estudiante_ApiView(APIView):
     
     def get(self, request, estudiante_numero_Id=None, format=None):
         try:
-            if estudiante_numero_Id:
-                estudiante = Estudiante.objects.get(estudiante_numero_Id=estudiante_numero_Id)
-                serializer = EstudianteSerializers(estudiante)
-                estudiante_data = serializer.data
-                user = User.objects.get(id=estudiante_data['user'])
-                curso = Curso.objects.get(id=estudiante_data['curso'])
-                response_data = {
-                    'id': estudiante_data['id'],
-                    'UsernameLogin': user.username,
-                    'Nombre_estudiante': user.first_name + " " + user.last_name,
-                    'Identificacion_estudiante': estudiante_data['estudiante_numero_Id'],
-                    'Curso': curso.nombre_curso
-                }
-                return Response(response_data)
-            else:
-                estudiantes = Estudiante.objects.all()
-                serializer = EstudianteSerializers(estudiantes, many=True)
-                estudiantes_data = []
-                for data_dict in serializer.data:
-                    estudiante_info = {f"{key}": value for key, value in data_dict.items()}
-                    user = User.objects.get(id=estudiante_info['user'])
-                    curso = Curso.objects.get(id=estudiante_info['curso'])
-                    estudiantes_data.append({
-                        'id': estudiante_info['id'],
-                        'UsernameLogin': user.username,
-                        'Nombre_estudiante': user.first_name + " " + user.last_name,
-                        'Identificacion_estudiante': estudiante_info['estudiante_numero_Id'],
-                        'Curso': curso.nombre_curso
+            matricula = Matricula.objects.all()
+            serializers = MatriculaSerializer(matricula, many=True)
+            estudiantes_data = []
+            for miMatricula in serializers.data:
+                estudiante = Estudiante.objects.get(id = miMatricula['estudiante'])
+                curso = Curso.objects.get(id = miMatricula['curso'])
+                
+                estudiantes_data.append({
+                    'id':estudiante.id,
+                    'Username_Login':estudiante.user.username,
+                    'Nombre_Estudiante':estudiante.user.first_name + ' ' + estudiante.user.last_name,
+                    'Identificacion_Estudiante':estudiante.estudiante_numero_Id,
+                    'Acceso': estudiante.estudiante_estado,
+                    'id_Curso_Estudiante':curso.id,
+                    'Curso_Estudiante':curso.nombre_curso,
+                    'Id_Materia_Estudiante':curso.materia.id,
+                    'Materia_Estudiante':curso.materia.nombre_materia
                     })
-                return Response(estudiantes_data)    
-        except Estudiante.DoesNotExist:
-            return Response({"error": "Estudiante no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(estudiantes_data)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        
-class AppUser_Participante_ApiView(APIView):
+
+class AppUser_EstudiantesCursoMateria(APIView):
     permission_classes = (permissions.IsAuthenticated,)
-    # Obtiene la lista de todos los estudiantes
     def get(self, request, format=None):
 
         try:
-            participante = Participante.objects.all()
-            serializer = ParticipanteSerializers(participante, many=True)
-            participante_data = []
-            for data_dict in serializer.data:
-                participante_info = {f"{key}": value for key, value in data_dict.items()}
-                user = User.objects.get(id = participante_info['user'])
-                curso = Curso.objects.get(id = participante_info['curso'])
-                participante_data.append({
-                    'id': participante_info['id'],
-                    'Username_Login': user.username,
-                    'Nombre_estudiante': user.first_name + " " + user.last_name,
-                    'Identificacion': participante_info['participante_numero_Id'],
-                    'Curso': curso.nombre_curso
-                })
-            return Response(participante_data)
+            pMateria =  request.query_params.get("pMateria", None)
+            pCurso = request.query_params.get("pCurso", None)
+
+            if pMateria is None and  pCurso is None:
+                return Response({'Error':"Los parámetros pMateria y pCurso son necesarios."})
+            
+            matricula = Matricula.objects.all()
+            serializers = MatriculaSerializer(matricula, many=True)
+            estudiantes_data = []
+            for miMatricula in serializers.data:
+                estudiante = Estudiante.objects.get(id = miMatricula['estudiante'])
+                curso = Curso.objects.get(id = miMatricula['curso'])
+                id_materia = curso.materia.id
+                print(id_materia == pMateria)
+                print(miMatricula['curso'] == pCurso)
+
+                if id_materia == int(pMateria) and miMatricula['curso'] == int(pCurso):
+                    estudiantes_data.append({
+                        'id':estudiante.id,
+                        'Username_Login':estudiante.user.username,
+                        'Nombre_Estudiante':estudiante.user.first_name + ' ' + estudiante.user.last_name,
+                        'Identificacion_Estudiante':estudiante.estudiante_numero_Id,
+                        'Acceso': estudiante.estudiante_estado,
+                        'id_Curso_Estudiante':curso.id,
+                        'Curso_Estudiante':curso.nombre_curso,
+                        'Id_Materia_Estudiante':curso.materia.id,
+                        'Materia_Estudiante':curso.materia.nombre_materia
+                        })
+            return Response(estudiantes_data)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-          

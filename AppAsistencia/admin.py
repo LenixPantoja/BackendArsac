@@ -1,5 +1,5 @@
 from django.contrib import admin
-from AppAsistencia.models import Curso ,Horario, Materia, Periodo, ObservacionesEstudiante, ObservacionParticipantes, AsistenciaEstudiante, AsistenciaParticipante
+from AppAsistencia.models import Curso ,Horario, Materia, Matricula, Periodo, ObservacionesEstudiante, AsistenciaEstudiante
 # Register your models here.
 @admin.register(Horario)
 class HorarioAdmin(admin.ModelAdmin):
@@ -31,24 +31,18 @@ class CursoAdmin(admin.ModelAdmin):
 
 @admin.register(AsistenciaEstudiante)
 class AsistenciaEstudianteAdmin(admin.ModelAdmin):
-    list_display = ('tipo_asistencia', 'estudiante', 'curso', 'hora_llegada', 'asistenciaEst_created_at')
-    list_filter = ('curso', 'tipo_asistencia')
-    search_fields = ('estudiante__usuario__username', 'curso__nombre_curso')
+    list_display = ('tipo_asistencia', 'matricula_estudiante', 'hora_llegada', 'asistenciaEst_created_at')
+    list_filter = ('matricula_estudiante', 'tipo_asistencia')
+    search_fields = ('estudiante__usuario__username', 'matricula_estudiante')
     date_hierarchy = 'asistenciaEst_created_at'
 
-@admin.register(AsistenciaParticipante)
-class AsistenciaParticipanteAdmin(admin.ModelAdmin):
-    list_display = ('tipo_asistencia', 'participante', 'curso', 'hora_llegada', 'asistenciaPart_created_at')
-    list_filter = ('curso', 'tipo_asistencia')
-    search_fields = ('participante__usuario__username', 'curso__nombre_curso')
-    date_hierarchy = 'asistenciaPart_created_at'
+@admin.register(Matricula)
+class MatriculaAdmin(admin.ModelAdmin):
+    list_display = ('estudiante', 'curso')
+    search_fields = ('estudiante__nombre', 'curso__nombre_curso')
+    list_filter = ('curso',)
 
 @admin.register(ObservacionesEstudiante)
 class ObservacionesEstudianteAdmin(admin.ModelAdmin):
     list_display = ('observacionEst', 'asistenciaEst', 'observacion_created_at', 'observacion_updated_at')
     search_fields = ('observacionEst', 'asistenciaEst__descripcion')  
-
-@admin.register(ObservacionParticipantes)
-class ObservacionParticipantesAdmin(admin.ModelAdmin):
-    list_display = ('observacionPart', 'asistenciaPart', 'observacion_created_at', 'observacion_updated_at')
-    search_fields = ('observacionPart', 'asistenciaPart__descripcion')

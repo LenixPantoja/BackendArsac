@@ -42,15 +42,16 @@ class AppApiReportesPorEstudiante(APIView):
             )
         # Recorridos
         for dataAsistencia in serializer.data:
-            estudiante = Estudiante.objects.get(id=dataAsistencia["estudiante"])
+            matricula = Matricula.objects.get(id=dataAsistencia["matricula_estudiante"])
+            estudiante = Estudiante.objects.get(id=matricula.estudiante.id)
             cedulaEst =  estudiante.estudiante_numero_Id
-            curso = Curso.objects.get(id=dataAsistencia["curso"])
+            curso = Curso.objects.get(id=matricula.curso.id)
             idCurso = curso.id
             idMateria = curso.materia.id
             periodo = Periodo.objects.get(id=curso.periodo.id)
             fecha_objeto = datetime.strptime(dataAsistencia["asistenciaEst_created_at"], '%Y-%m-%dT%H:%M:%S.%fZ')
             fecha_formateada = fecha_objeto.strftime('%Y-%m-%d')
-
+            print(idCurso, idMateria)
             if (fecha_formateada >= pRango1 and 
                 fecha_formateada <= pRango2 and 
                 pNumeroDocumento == cedulaEst and 
@@ -101,9 +102,10 @@ class AppApiReporteDiario(APIView):
             )
         
         for dataAsistencia in serializer.data:
-            estudiante = Estudiante.objects.get(id=dataAsistencia["estudiante"])
+            matricula = Matricula.objects.get(id=dataAsistencia["matricula_estudiante"])
+            estudiante = Estudiante.objects.get(id=matricula.estudiante.id)
             cedulaEst =  estudiante.estudiante_numero_Id
-            curso = Curso.objects.get(id=dataAsistencia["curso"])
+            curso = Curso.objects.get(id=matricula.curso.id)
             periodo = Periodo.objects.get(id=curso.periodo.id)
             fecha_objeto = datetime.strptime(dataAsistencia["asistenciaEst_created_at"], '%Y-%m-%dT%H:%M:%S.%fZ')
             observaciones = ObservacionesEstudiante.objects.all()
@@ -160,9 +162,10 @@ class AppApiReportePorCurso(APIView):
             )
         # Recorridos
         for dataAsistencia in serializer.data:
-            estudiante = Estudiante.objects.get(id=dataAsistencia["estudiante"])
+            matricula = Matricula.objects.get(id=dataAsistencia["matricula_estudiante"])
+            estudiante = Estudiante.objects.get(id=matricula.estudiante.id)
             cedulaEst =  estudiante.estudiante_numero_Id
-            curso = Curso.objects.get(id=dataAsistencia["curso"])
+            curso = Curso.objects.get(id=matricula.curso.id)
             idCurso = curso.id
             idMateria = curso.materia.id
             periodo = Periodo.objects.get(id=curso.periodo.id)
