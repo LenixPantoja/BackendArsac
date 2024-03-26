@@ -118,56 +118,60 @@ class AppAsist_API_Curso(APIView):
     
     # Obtiene la lista de cursos dado el docente
     def get(self, request, format=None):
-        # Obtener todos los horarios y serializarlos
-        try:
-            pUserDocente = request.query_params.get("pDocente", None)
-            # Parametro de consulta @pUserDocente es el usuario decente
-            if pUserDocente is not None:
-                cursos = Curso.objects.all()
-                serializer = CursoSerializer(cursos, many=True)
+        pUserDocente = request.query_params.get("pDocente", None)
+        
+        if pUserDocente is not None:
+            cursos = Curso.objects.all()
+            serializer = CursoSerializer(cursos, many=True)
+            
+            curso_data = []
+            cursos_procesados = set()  # Usar un conjunto para evitar duplicados
+            nombre_docente = ""
+            for miCurso in serializer.data:
+                curso_info = {f"{key}": value for key, value in miCurso.items()}
                 
-                curso_data = []
-                for miCurso in serializer.data:
-                    curso_info = {f"{key}": value for key, value in miCurso.items()}
-                    id_materia = curso_info['materia']
-                    id_perido = curso_info['periodo']
-                    materia = Materia.objects.filter(id=id_materia)
-                    periodo = Periodo.objects.filter(id=id_perido)
-
-                    for miMateria in materia:
-                        print('')
-                    
-                    for miPeriodo in periodo:
-                        print('')  
-                    hora_inicio = miMateria.horario.hora_inicio
-                    hora_inicio_format = hora_inicio.strftime("%I:%M:%S %p")
-                    hora_fin = miMateria.horario.hora_fin
-                    hora_fin_format = hora_fin.strftime("%I:%M:%S %p")
-
-                    user_docente = miMateria.docente.user.username
-                    if pUserDocente == user_docente:
-                        curso_data.append({
-                            'id': curso_info['id'],
-                            'nombre_curso': curso_info['nombre_curso'],
-                            'materia':miMateria.nombre_materia,
-                            'Hora_Inicio_Clase':hora_inicio_format,
-                            'Hora_Fin_Clase':hora_fin_format,
-                            'tipo_horario': miMateria.horario.tipoHorario,
-                            'periodo': miPeriodo.nombre_periodo,
-                            'Docente': miMateria.docente.user.first_name
-                        })
-                return Response(curso_data)
-            else:
-                return Response(
-                    {"error": "El parámetro p es necesario."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-        except Exception as e:
+                # Verificar si las claves necesarias están presentes en curso_info
+                if 'nombre_curso' not in curso_info or 'materia' not in curso_info or 'periodo' not in curso_info:
+                    continue  # Omitir este curso si falta alguna clave requerida
+                
+                id_materia = curso_info['materia']
+                id_perido = curso_info['periodo']
+                materia = Materia.objects.filter(id=id_materia)
+                periodo = Periodo.objects.filter(id=id_perido)
+                
+                for miMateria in materia:
+                    pass  # No necesitas hacer nada aquí
+                
+                for miPeriodo in periodo:
+                    pass  # Tampoco necesitas hacer nada aquí
+                
+                hora_inicio = miMateria.horario.hora_inicio
+                hora_inicio_format = hora_inicio.strftime("%I:%M:%S %p")
+                hora_fin = miMateria.horario.hora_fin
+                hora_fin_format = hora_fin.strftime("%I:%M:%S %p")
+                user_docente = miMateria.docente.user.username
+                nombre_docente = user_docente
+                # Verificar si el docente coincide y si el curso ya se ha procesado
+                curso_key = (curso_info['nombre_curso'], curso_info.get('Docente', ''))  # Utiliza get para manejar la falta de la clave 'Docente'
+                if user_docente == pUserDocente and curso_key not in cursos_procesados:
+                    cursos_procesados.add(curso_key)
+                    curso_data.append({
+                        'id': curso_info['id'],
+                        'nombre_curso': curso_info['nombre_curso'],
+                        'materia': miMateria.nombre_materia,
+                        'Hora_Inicio_Clase': hora_inicio_format,
+                        'Hora_Fin_Clase': hora_fin_format,
+                        'tipo_horario': miMateria.horario.tipoHorario,
+                        'periodo': miPeriodo.nombre_periodo,
+                        'Docente': nombre_docente  # Utiliza get para manejar la falta de la clave 'Docente'
+                    })
+            
+            return Response(curso_data)
+        else:
             return Response(
-                {"error": "Hubo un problema al obtener los cursos y las materias"},
-                status=status.HTTP_204_NO_CONTENT,
+                {"error": "El parámetro pDocente es necesario."},
+                status=status.HTTP_400_BAD_REQUEST,
             )
-
 
 class AppAsist_API_AsistenciaEst(APIView):
     permission_classes = (permissions.IsAuthenticated,)
