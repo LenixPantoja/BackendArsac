@@ -16,9 +16,8 @@ urlpatterns = [
     path('api/Docente/', AppUser_Docente_ApiView.as_view(), name = 'Api-docente'),
     # Api para crear, obtener, eliminar estudiantes
     path('api/Estudiantes', AppUser_Estudiante_ApiView.as_view(), name = 'Api-Estudiantes'),
+    # Api para listar estudiantes de acuerdo a los parametros de consulta.
+    path('api/EstudiantesCursoMaterias', AppUser_EstudiantesCursoMateria.as_view(), name = 'Api-Estudiante-C-M'),
     # Api para buscar un estudiante dado el numero de docuemento
-    path('api/Estudiantes/<str:estudiante_numero_Id>/', AppUser_Estudiante_ApiView.as_view(), name='estudiante_detail'),
-    # Api para crear, obtener, eliminar participantes
-    path('api/Participante', AppUser_Participante_ApiView.as_view(), name = 'Api-Estudiantes'),
-    # Api para crear, obtener, eliminar participantes
+    path('api/Estudiantes/<str:estudiante_numero_Id>/', AppUser_Estudiante_ApiView.as_view())
 ]

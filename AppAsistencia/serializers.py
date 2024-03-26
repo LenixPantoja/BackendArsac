@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from AppAsistencia.models import Curso, Horario, Periodo, Materia, AsistenciaEstudiante, AsistenciaParticipante, ObservacionesEstudiante, ObservacionParticipantes
+from AppAsistencia.models import Curso, Horario, Periodo, Materia, Matricula, AsistenciaEstudiante, ObservacionesEstudiante
 
 
 class CursoSerializer(serializers.ModelSerializer):
@@ -21,15 +21,15 @@ class MateriaSerializer(serializers.ModelSerializer):
      class Meta:
           model = Materia
           fields = ('__all__')
+
+class MatriculaSerializer(serializers.ModelSerializer):
+     class Meta:
+          model = Matricula
+          fields = ('__all__')
      
 class AsistenciaEstudianteSerializer(serializers.ModelSerializer):
      class Meta:
           model =AsistenciaEstudiante
-          fields = ('__all__')
-
-class AsistenciaParticipanteSerializer(serializers.ModelSerializer):
-     class Meta:
-          model = AsistenciaParticipante
           fields = ('__all__')
 
 class ObservacionesEstSerializer(serializers.ModelSerializer):
@@ -37,7 +37,3 @@ class ObservacionesEstSerializer(serializers.ModelSerializer):
           model = ObservacionesEstudiante
           fields = ('__all__')
 
-class ObservacionesPartSerializer(serializers.ModelSerializer):
-     class Meta:
-          model = ObservacionParticipantes
-          fields = ('__all__')

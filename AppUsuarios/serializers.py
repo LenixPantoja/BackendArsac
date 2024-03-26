@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Docente, Profesion, Estudiante, Participante
+from .models import Docente, Profesion, Estudiante
 from django.contrib.auth.models import User
 
 
@@ -26,12 +26,6 @@ class DocenteSerializers(serializers.ModelSerializer):
 class EstudianteSerializers(serializers.ModelSerializer):
     class Meta:
         model = Estudiante
-        fields = '__all__'   
-
-""" Clase serializable de Participante"""
-class ParticipanteSerializers(serializers.ModelSerializer):
-    class Meta:
-        model = Participante
         fields = '__all__'   
 
 """ Clase serializable de usuarios """

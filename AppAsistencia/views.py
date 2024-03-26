@@ -168,6 +168,7 @@ class AppAsist_API_Curso(APIView):
                 status=status.HTTP_204_NO_CONTENT,
             )
 
+
 class AppAsist_API_AsistenciaEst(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
@@ -175,71 +176,32 @@ class AppAsist_API_AsistenciaEst(APIView):
         try:
             serializer = AsistenciaEstudianteSerializer(data=request.data)
             if serializer.is_valid():
-                pNumeroDocumento = request.query_params.get("pNumeroDocumento", None)
-                # Parametro de consulta
-                if pNumeroDocumento is None:
-                    return Response(
-                        {"error": "El parámetro pNumeroDocumento es necesario."},
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
-                # Verifica si el estudiante exite en la base de datos.
-                existing_estudiante = Estudiante.objects.filter(
-                    estudiante_numero_Id=pNumeroDocumento
-                ).first()
-                # Obtiene el curso de estudiante encontrado.
-                CursoEstudinte = existing_estudiante.curso
-                QuerySetCurso1 = Curso.objects.filter(id=CursoEstudinte)
-                nombreCurso1 = ""
-                # Obtenemos el nombre del curso del estudiante que esta en la lista
-                for i in QuerySetCurso1:
-                    nombreCurso1 = i
                 
-                idCurso = request.data.get("curso")
-                QuerySetCurso2 = Curso.objects.filter(id= idCurso)
-                nombreCurso2= ""
-                for j in QuerySetCurso2:
-                    nombreCurso2 = j
-                
-                print(existing_estudiante.estudiante_numero_Id)
-                print(type(nombreCurso1))
-                print(type(nombreCurso2))
-                # Verifica si el estudiante fue encontrado y si esta en el curso correcto.
-                if existing_estudiante and str(nombreCurso1) == str(nombreCurso2):
-                #if existing_estudiante and CursoEstudinte == request.data.get("curso"):
                 
                     dataAsisEstudiante = request.data
-                    # Obtiene el nombre del estudiante quien marcó la asistencia.
-                    nombreEstudiante = (
-                        existing_estudiante.user.first_name
-                        + " "
-                        + existing_estudiante.user.last_name
-                    )
-                    estudiante = Estudiante.objects.get(
-                        id=dataAsisEstudiante["estudiante"]
-                    )
-                    curso = Curso.objects.get(id=dataAsisEstudiante["curso"])
+                    
+                    matricula = Matricula.objects.get(id=dataAsisEstudiante["matricula_estudiante"])
 
                     asistenciaEstudiante = AsistenciaEstudiante(
                         tipo_asistencia=dataAsisEstudiante["tipo_asistencia"],
                         descripcion=dataAsisEstudiante["descripcion"],
                         hora_llegada=dataAsisEstudiante["hora_llegada"],
                         soporte=dataAsisEstudiante["soporte"],
-                        estudiante=estudiante,
-                        curso=curso,
+                        matricula_estudiante = matricula
                     )
                     asistenciaEstudiante.save()
                     return Response(
                         {
                             "msg": "Se ha creado la asistencia",
-                            "NombreEstudiante": estudiante.user.first_name + " " + estudiante.user.last_name
+                            "NombreEstudiante": matricula.estudiante.user.first_name + " " + matricula.estudiante.user.last_name
                         }
                     )
-                else:
-                    return Response(
-                        {
-                            "msg": "No se encontró el estudiante o el estudiante no pertenece a al curso seleccionado."
-                        }
-                    )
+            else:
+                return Response(
+                    {
+                        "msg": "No se encontró el estudiante o el estudiante no pertenece a al curso seleccionado."
+                    }
+                )
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -250,142 +212,19 @@ class AppAsist_API_AsistenciaEst(APIView):
         asistencia_data = []
         for data_dict in serializer.data:
             asistencia_info = {f"{key}": value for key, value in data_dict.items()}
-            querySetEstudiante = Estudiante.objects.filter(id = asistencia_info['estudiante'])
-            for miEstudiante in querySetEstudiante:
-                pass
-            curso = Curso.objects.get( id = asistencia_info['curso'])
-            print(curso.materia.nombre_materia)
+            matricula = Matricula.objects.get( id = asistencia_info['matricula_estudiante'])
+            print(matricula.curso.materia.nombre_materia)
             asistencia_data.append({
                 'id': asistencia_info['id'],
                 'Tipo_asistencia':asistencia_info['tipo_asistencia'],
                 'Descripcion_asistencia': asistencia_info['descripcion'],
                 'Hora_llegada': asistencia_info['hora_llegada'],
                 'Soporte_imagen': asistencia_info['soporte'],
-                'Estudiante': miEstudiante.user.first_name + " " + miEstudiante.user.last_name,
-                'Curso': curso.nombre_curso,
-                'Materia': curso.materia.nombre_materia
+                'Estudiante': matricula.estudiante.user.first_name + " " + matricula.estudiante.user.last_name,
+                'Curso': matricula.curso.nombre_curso,
+                'Materia': matricula.curso.materia.nombre_materia
             })
         return Response(asistencia_data)
-
-
-class AppAsist_API_AsistenciaPart(APIView):
-    permission_classes = (permissions.IsAuthenticated,)
-
-    def post(self, request, format=None):
-        try:
-            serializer = AsistenciaParticipanteSerializer(data=request.data)
-            if serializer.is_valid():
-                #Solicita el numero de documento como parametro de consulta.
-                pNumeroDocumento = request.query_params.get("pNumeroDocumento", None)
-                # Parametro de consulta
-                if pNumeroDocumento is None:
-                    return Response(
-                        {"error": "El parámetro pNumeroDocumento es necesario."},
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
-                # Verifica si el estudiante exite en la base de datos.
-                existing_participante = Participante.objects.filter(
-                    participante_numero_Id=pNumeroDocumento
-                ).first()
-                # Obtiene el curso de estudiante encontrado.
-                CursoParticipante = existing_participante.curso
-                # Veriica si el estudiante fue encontrado y si esta en el curso correcto.
-
-                if CursoParticipante and CursoParticipante == request.data.get("curso"):
-                    dataParticipante = request.data
-                    # Obtiene el nombre del estudiante quien marcó la asistencia.
-                    nombreParticipante = (
-                        existing_participante.user.first_name
-                        + " "
-                        + existing_participante.user.last_name
-                    )
-                    participante = Participante.objects.get(
-                        id=dataParticipante["participante"]
-                    )
-                    curso = Curso.objects.get(id=dataParticipante["curso"])
-
-                    asistenciaParticipante = AsistenciaParticipante(
-                        tipo_asistencia=dataParticipante["tipo_asistencia"],
-                        descripcion=dataParticipante["descripcion"],
-                        hora_llegada=dataParticipante["hora_llegada"],
-                        soporte=dataParticipante["soporte"],
-                        participante=participante,
-                        curso=curso,
-                    )
-                    asistenciaParticipante.save()
-                    return Response(
-                        {
-                            "msg": "Se ha creado la asistencia",
-                            "NombreEstudiante": nombreParticipante,
-                        }
-                    )
-                else:
-                    return Response(
-                        {
-                            "msg": "No se encontró el estudiante o el estudiante no pertenece a al curso seleccionado."
-                        }
-                    )
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-    def get(self, request, format=None):
-        # Obtener todas las asistencias y serializarlos
-        asistenciaPart = AsistenciaParticipante.objects.all()
-        serializer = AsistenciaParticipanteSerializer(asistenciaPart, many=True)
-        asistencia_data = []
-        for data_dict in serializer.data:
-            asistencia_info = {f"{key}": value for key, value in data_dict.items()}
-            querySetParticipante = Participante.objects.filter(id = asistencia_info['participante'])
-            for miParticipante in querySetParticipante:
-                pass
-            curso = Curso.objects.get( id = asistencia_info['curso'])
-            print(curso.materia.nombre_materia)
-            asistencia_data.append({
-                'id': asistencia_info['id'],
-                'Tipo_asistencia':asistencia_info['tipo_asistencia'],
-                'Descripcion_asistencia': asistencia_info['descripcion'],
-                'Hora_llegada': asistencia_info['hora_llegada'],
-                'Soporte_imagen': asistencia_info['soporte'],
-                'Participante': miParticipante.user.first_name + " " + miParticipante.user.last_name,
-                'Curso': curso.nombre_curso,
-                'Materia': curso.materia.nombre_materia
-            })
-        return Response(asistencia_data)
-
-class AppAsist_API_ObservacionesEstudiante(APIView):
-    permission_classes = (permissions.IsAuthenticated,)
-    def post(self, request, format=None):
-        try:
-            serializer = ObservacionesEstSerializer(data=request.data)
-            if serializer.is_valid():
-                data_observaciones = request.data
-                # Obtener la instancia de AsistenciaEstudiante utilizando el ID proporcionado
-                asistencia_estudiante_id = data_observaciones.get("asistenciaEst")
-                # Guardamos el ID de la asistencia
-                id_asistencia_estudiante = AsistenciaEstudiante.objects.get(pk=asistencia_estudiante_id)
-                nombre_estudiante = id_asistencia_estudiante.estudiante.user.first_name + " " + id_asistencia_estudiante.estudiante.user.last_name
-                # Creamos un objeto de tipo ObservacionEstudiante
-                obervacion_estudiante = ObservacionesEstudiante(
-                    asistenciaEst = id_asistencia_estudiante,
-                    observacionEst = data_observaciones["observacionEst"]
-                )
-                obervacion_estudiante.save()
-                return Response(
-                        {
-                            "msg": f"Se creo la observación del estudiante: {nombre_estudiante}"
-                        }
-                    )
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        
-    def get(self, request, format=None):
-        observacionesEstudiante = ObservacionesEstudiante.objects.all()
-        serializer =  ObservacionesEstSerializer(observacionesEstudiante, many =  True)
-
-        return Response(serializer.data)
     
 class AppAsist_API_ObservacionesEstudiante(APIView):
 
@@ -399,7 +238,7 @@ class AppAsist_API_ObservacionesEstudiante(APIView):
                 asistencia_estudiante_id = data_observaciones.get("asistenciaEst")
                 # Guardamos el ID de la asistencia
                 id_asistencia_estudiante = AsistenciaEstudiante.objects.get(pk=asistencia_estudiante_id)
-                nombre_estudiante = id_asistencia_estudiante.estudiante.user.first_name + " " + id_asistencia_estudiante.estudiante.user.last_name
+                nombre_estudiante = id_asistencia_estudiante.matricula_estudiante.estudiante.user.first_name + " " + id_asistencia_estudiante.matricula_estudiante.estudiante.user.last_name
                 # Creamos un objeto de tipo ObservacionEstudiante
                 obervacion_estudiante = ObservacionesEstudiante(
                     asistenciaEst = id_asistencia_estudiante,
@@ -432,11 +271,11 @@ class AppAsist_API_ObservacionesEstudiante(APIView):
                 "id": observacion_info["id"],
                 "id_asistencia": id_asistencia,
                 "Descripcion": observacion_info["observacionEst"],
-                "Curso": data_Asistencia.curso.nombre_curso,
-                "Periodo": data_Asistencia.curso.periodo.nombre_periodo,
-                "Estudiante": data_Asistencia.estudiante.user.first_name + " " + data_Asistencia.estudiante.user.last_name,
-                "Materia": data_Asistencia.curso.materia.nombre_materia,
-                "Docente": data_Asistencia.curso.materia.docente.user.first_name + " " + data_Asistencia.curso.materia.docente.user.last_name
+                "Curso": data_Asistencia.matricula_estudiante.curso.nombre_curso,
+                "Periodo": data_Asistencia.matricula_estudiante.curso.periodo.nombre_periodo,
+                "Estudiante": data_Asistencia.matricula_estudiante.estudiante.user.first_name + " " + data_Asistencia.matricula_estudiante.estudiante.user.last_name,
+                "Materia": data_Asistencia.matricula_estudiante.curso.materia.nombre_materia,
+                "Docente": data_Asistencia.matricula_estudiante.curso.materia.docente.user.first_name + " " + data_Asistencia.matricula_estudiante.curso.materia.docente.user.last_name
                 })
         
         return Response(lista_observaciones)
@@ -463,61 +302,6 @@ class AppAsist_API_ObservacionesEstudiante(APIView):
             return Response({"error": "La observación no existe"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-class AppAsist_API_ObservacionesParticipante(APIView):
-    permission_classes = (permissions.IsAuthenticated,)
-    def post(self, request, format=None):
-        try:
-            serializer = ObservacionesPartSerializer(data=request.data)
-            if serializer.is_valid():
-                data_observaciones = request.data
-                # Obtener la instancia de AsistenciaParticipante utilizando el ID proporcionado
-                asistencia_participante = data_observaciones.get("asistenciaPart")
-                # Guardamos el ID de la asistencia
-                id_asistencia_participante = AsistenciaParticipante.objects.get(pk=asistencia_participante)
-                # Guardamos en la variable el nombre del participante
-                nombre_participante = id_asistencia_participante.participante.user.first_name + " " + id_asistencia_participante.participante.user.last_name
-                # Creamos un objeto de tipo ObservacionEstudiante
-                obervacion_participante = ObservacionParticipantes(
-                    asistenciaPart = id_asistencia_participante,
-                    observacionPart = data_observaciones["observacionPart"]
-                )
-                obervacion_participante.save()
-                return Response(
-                        {
-                            "msg": f"Se creo la observación del participante: {nombre_participante}"
-                        }
-                    )
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        
-    def get(self, request, format=None):
-        lista_observaciones = []
-        observacionesParticipante = ObservacionParticipantes.objects.all()
-        serializer =  ObservacionesPartSerializer(observacionesParticipante, many=True)
-        data_observaciones = request.data
-        id_asistencia =  data_observaciones.get("asistenciaPart")
-        query_Set_Asistencia = AsistenciaParticipante.objects.filter(id = id_asistencia)
-
-        for data_dict in serializer.data:
-            observacion_info = {f"{key}": value for key, value in data_dict.items()}
-            for data_Asistencia in query_Set_Asistencia:
-                pass
-            lista_observaciones.append({
-                "id": observacion_info["id"],
-                "id_asistencia": id_asistencia,
-                "Descripcion": observacion_info["observacionPart"],
-                "Curso": data_Asistencia.curso.nombre_curso,
-                "Periodo": data_Asistencia.curso.periodo.nombre_periodo,
-                "Participante": data_Asistencia.participante.user.first_name + " " + 
-                                data_Asistencia.participante.user.last_name,
-                "Materia": data_Asistencia.curso.materia.nombre_materia,
-                "Docente": data_Asistencia.curso.materia.docente.user.first_name + " " + 
-                           data_Asistencia.curso.materia.docente.user.last_name
-                })
-        return Response(lista_observaciones)
     
 class AppAsist_API_HorarioDocente(APIView):
     def get(self, request, format=None):
