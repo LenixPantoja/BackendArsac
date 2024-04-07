@@ -132,7 +132,8 @@ class AppUser_Estudiante_ApiView(APIView):
                     'id_Curso_Estudiante':curso.id,
                     'Curso_Estudiante':curso.nombre_curso,
                     'Id_Materia_Estudiante':curso.materia.id,
-                    'Materia_Estudiante':curso.materia.nombre_materia
+                    'Materia_Estudiante':curso.materia.nombre_materia,
+                    
                     })
             return Response(estudiantes_data)
         except Exception as e:
@@ -156,9 +157,7 @@ class AppUser_EstudiantesCursoMateria(APIView):
                 estudiante = Estudiante.objects.get(id = miMatricula['estudiante'])
                 curso = Curso.objects.get(id = miMatricula['curso'])
                 id_materia = curso.materia.id
-                print(id_materia == pMateria)
-                print(miMatricula['curso'] == pCurso)
-
+                
                 if id_materia == int(pMateria) and miMatricula['curso'] == int(pCurso):
                     estudiantes_data.append({
                         'id':estudiante.id,
@@ -169,7 +168,8 @@ class AppUser_EstudiantesCursoMateria(APIView):
                         'id_Curso_Estudiante':curso.id,
                         'Curso_Estudiante':curso.nombre_curso,
                         'Id_Materia_Estudiante':curso.materia.id,
-                        'Materia_Estudiante':curso.materia.nombre_materia
+                        'Materia_Estudiante':curso.materia.nombre_materia,
+                        'id_Matricula': miMatricula['id']
                         })
             return Response(estudiantes_data)
         except Exception as e:
