@@ -201,13 +201,9 @@ class AppAsist_API_AsistenciaEst(APIView):
                         }
                     )
             else:
-                return Response(
-                    {
-                        "msg": "No se encontró el estudiante o el estudiante no pertenece a al curso seleccionado."
-                    }
-                )
+                return Response({"Error":serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": str(e)}, status=status.HTTP_200_OK)
 
     def get(self, request, format=None):
         # Obtener todas las asistencias y serializarlos
@@ -258,31 +254,68 @@ class AppAsist_API_ObservacionesEstudiante(APIView):
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        
+    
+    
     def get(self, request, format=None):
-        lista_observaciones = []
-        observacionesEstudiante = ObservacionesEstudiante.objects.all()
-        serializer =  ObservacionesEstSerializer(observacionesEstudiante, many =  True)
-        data_observaciones = request.data
-        id_asistencia =  data_observaciones.get("asistenciaEst")
-        query_Set_Asistencia = AsistenciaEstudiante.objects.filter(id = id_asistencia)
-
-        for data_dict in serializer.data:
-            observacion_info = {f"{key}": value for key, value in data_dict.items()}
-            for data_Asistencia in query_Set_Asistencia:
-                pass
-            lista_observaciones.append({
-                "id": observacion_info["id"],
-                "id_asistencia": id_asistencia,
-                "Descripcion": observacion_info["observacionEst"],
-                "Curso": data_Asistencia.matricula_estudiante.curso.nombre_curso,
-                "Periodo": data_Asistencia.matricula_estudiante.curso.periodo.nombre_periodo,
-                "Estudiante": data_Asistencia.matricula_estudiante.estudiante.user.first_name + " " + data_Asistencia.matricula_estudiante.estudiante.user.last_name,
-                "Materia": data_Asistencia.matricula_estudiante.curso.materia.nombre_materia,
-                "Docente": data_Asistencia.matricula_estudiante.curso.materia.docente.user.first_name + " " + data_Asistencia.matricula_estudiante.curso.materia.docente.user.last_name
-                })
         
-        return Response(lista_observaciones)
+        lista_observaciones = []
+        pIdEstudiante = request.query_params.get("pIdEstudiante")
+        pIdMateria =  request.query_params.get("pIdMateria")
+        pIdCurso = request.query_params.get("pIdCurso")
+
+        if pIdEstudiante:
+            observacionesEstudiante = ObservacionesEstudiante.objects.all()
+            serializer =  ObservacionesEstSerializer(observacionesEstudiante, many =  True)
+            data_observaciones = request.data
+            id_asistencia =  data_observaciones.get("asistenciaEst")
+            query_Set_Asistencia = AsistenciaEstudiante.objects.filter(id = id_asistencia)
+
+            for data_dict in serializer.data:
+                observacion_info = {f"{key}": value for key, value in data_dict.items()}
+                for data_Asistencia in query_Set_Asistencia:
+                    pass
+
+                identificacion_estudiante = data_Asistencia.matricula_estudiante.estudiante.id
+                id_curso = data_Asistencia.matricula_estudiante.curso.id
+                id_materia = data_Asistencia.matricula_estudiante.curso.materia.id
+
+                if identificacion_estudiante == int(pIdEstudiante) and id_curso == int(pIdCurso) and id_materia == int(pIdMateria):
+                    lista_observaciones.append({
+                        "id": observacion_info["id"],
+                        "id_asistencia": id_asistencia,
+                        "Descripcion": observacion_info["observacionEst"],
+                        "Curso": data_Asistencia.matricula_estudiante.curso.nombre_curso,
+                        "Periodo": data_Asistencia.matricula_estudiante.curso.periodo.nombre_periodo,
+                        "Estudiante": data_Asistencia.matricula_estudiante.estudiante.user.first_name + " " + data_Asistencia.matricula_estudiante.estudiante.user.last_name,
+                        "Materia": data_Asistencia.matricula_estudiante.curso.materia.nombre_materia,
+                        "Docente": data_Asistencia.matricula_estudiante.curso.materia.docente.user.first_name + " " + data_Asistencia.matricula_estudiante.curso.materia.docente.user.last_name
+                        })
+                    print(lista_observaciones)
+            
+            return Response(lista_observaciones)
+        else:
+            observacionesEstudiante = ObservacionesEstudiante.objects.all()
+            serializer =  ObservacionesEstSerializer(observacionesEstudiante, many =  True)
+            data_observaciones = request.data
+            id_asistencia =  data_observaciones.get("asistenciaEst")
+            query_Set_Asistencia = AsistenciaEstudiante.objects.filter(id = id_asistencia)
+
+            for data_dict in serializer.data:
+                observacion_info = {f"{key}": value for key, value in data_dict.items()}
+                for data_Asistencia in query_Set_Asistencia:
+                    pass
+                lista_observaciones.append({
+                    "id": observacion_info["id"],
+                    "id_asistencia": id_asistencia,
+                    "Descripcion": observacion_info["observacionEst"],
+                    "Curso": data_Asistencia.matricula_estudiante.curso.nombre_curso,
+                    "Periodo": data_Asistencia.matricula_estudiante.curso.periodo.nombre_periodo,
+                    "Estudiante": data_Asistencia.matricula_estudiante.estudiante.user.first_name + " " + data_Asistencia.matricula_estudiante.estudiante.user.last_name,
+                    "Materia": data_Asistencia.matricula_estudiante.curso.materia.nombre_materia,
+                    "Docente": data_Asistencia.matricula_estudiante.curso.materia.docente.user.first_name + " " + data_Asistencia.matricula_estudiante.curso.materia.docente.user.last_name
+                    })
+
+            return Response(lista_observaciones)
     
     def delete(self, request, pk, format=None):
         try:
