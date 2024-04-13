@@ -1,3 +1,4 @@
+from urllib import request
 from django.shortcuts import get_object_or_404, render
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -10,6 +11,7 @@ from rest_framework import viewsets
 from django.http import JsonResponse
 from rest_framework import permissions, status
 from rest_framework.decorators import api_view, permission_classes
+from django.conf import settings
 
 from dateutil.parser import isoparse
 
@@ -206,26 +208,63 @@ class AppAsist_API_AsistenciaEst(APIView):
             return Response({"error": str(e)}, status=status.HTTP_200_OK)
 
     def get(self, request, format=None):
-        # Obtener todas las asistencias y serializarlos
-        asistenciaEst = AsistenciaEstudiante.objects.all()
-        serializer = AsistenciaEstudianteSerializer(asistenciaEst, many=True)
-        asistencia_data = []
-        for data_dict in serializer.data:
-            asistencia_info = {f"{key}": value for key, value in data_dict.items()}
-            matricula = Matricula.objects.get( id = asistencia_info['matricula_estudiante'])
-            print(matricula.curso.materia.nombre_materia)
-            asistencia_data.append({
-                'id': asistencia_info['id'],
-                'Tipo_asistencia':asistencia_info['tipo_asistencia'],
-                'Descripcion_asistencia': asistencia_info['descripcion'],
-                'Hora_llegada': asistencia_info['hora_llegada'],
-                'Soporte_imagen': asistencia_info['soporte'],
-                'Estudiante': matricula.estudiante.user.first_name + " " + matricula.estudiante.user.last_name,
-                'Curso': matricula.curso.nombre_curso,
-                'Materia': matricula.curso.materia.nombre_materia
-            })
-        return Response(asistencia_data)
-    
+        pIdEstudiante = request.query_params.get("pIdEstudiante")
+
+        if(pIdEstudiante is None):
+            return Response({"Error": "El parametro pIdEstudiante es necesario"})
+
+        if pIdEstudiante:
+            asistencia = AsistenciaEstudiante.objects.all()
+            lista_asistencia = []
+
+            for dataAsistencia in asistencia:
+                id_estudiante = dataAsistencia.matricula_estudiante.estudiante.id
+                soporte_url = None
+                if dataAsistencia.soporte:
+                    # Verificar si el campo soporte es un FileField o ImageField
+                    if hasattr(dataAsistencia.soporte, 'url'):
+                        soporte_url = request.build_absolute_uri(dataAsistencia.soporte.url)
+                    else:
+                        # Si no es un campo de tipo FileField o ImageField, asumimos que es la ruta de la imagen
+                        soporte_url = dataAsistencia.soporte
+                if id_estudiante == int(pIdEstudiante):
+                    lista_asistencia.append({
+                        'id': dataAsistencia.id,
+                        'Tipo_asistencia': dataAsistencia.tipo_asistencia,
+                        'Descripcion_asistencia': dataAsistencia.descripcion,
+                        'Hora_llegada' : dataAsistencia.hora_llegada,
+                        'Soporte_imagen': soporte_url,
+                        'Estudiante': dataAsistencia.matricula_estudiante.estudiante.user.first_name + ' ' + dataAsistencia.matricula_estudiante.estudiante.user.last_name,
+                        'Curso': dataAsistencia.matricula_estudiante.curso.nombre_curso,
+                        'Materia': dataAsistencia.matricula_estudiante.curso.materia.nombre_materia
+                    })
+            return Response(lista_asistencia)
+        else:
+            asistencia = AsistenciaEstudiante.objects.all()
+            lista_asistencia = []
+
+            for dataAsistencia in asistencia:
+                soporte_url = None
+                if dataAsistencia.soporte:
+                    # Verificar si el campo soporte es un FileField o ImageField
+                    if hasattr(dataAsistencia.soporte, 'url'):
+                        soporte_url = request.build_absolute_uri(dataAsistencia.soporte.url)
+                    else:
+                        # Si no es un campo de tipo FileField o ImageField, asumimos que es la ruta de la imagen
+                        soporte_url = dataAsistencia.soporte
+                
+                lista_asistencia.append({
+                    'id': dataAsistencia.id,
+                    'Tipo_asistencia': dataAsistencia.tipo_asistencia,
+                    'Descripcion_asistencia': dataAsistencia.descripcion,
+                    'Hora_llegada' : dataAsistencia.hora_llegada,
+                    'Soporte_imagen': soporte_url,
+                    'Estudiante': dataAsistencia.matricula_estudiante.estudiante.user.first_name + ' ' + dataAsistencia.matricula_estudiante.estudiante.user.last_name,
+                    'Curso': dataAsistencia.matricula_estudiante.curso.nombre_curso,
+                    'Materia': dataAsistencia.matricula_estudiante.curso.materia.nombre_materia
+                })
+            return Response(lista_asistencia)
+            
 class AppAsist_API_ObservacionesEstudiante(APIView):
 
     permission_classes = (permissions.IsAuthenticated,)
