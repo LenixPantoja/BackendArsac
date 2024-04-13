@@ -58,7 +58,7 @@ def obtener_observaciones_estudiante(url, token):
         print('Contenido de la respuesta:', response.text)
 
 # URL de la API
-url_api = 'http://127.0.0.1:8000/api/ObservacionesEstudiante/?pIdEstudiante=1&pIdMateria=1&pIdCurso=2'
+url_api = 'https://06e8-8-242-169-8.ngrok-free.app/api/ObservacionesEstudiante/?pIdEstudiante=1&pIdMateria=1&pIdCurso=2'
 
 # Token de autorización
 token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzEyNjkwOTIwLCJpYXQiOjE3MTI2MTg5MjAsImp0aSI6IjMxNGE4NzkzNjk4ZTQyYWY5N2MzMzE5YzhlMTZmMDlmIiwidXNlcl9pZCI6MX0.huxtbsaGQCfy5gOOXpENIa4hNXtbRiqETqycwtghpvE'
