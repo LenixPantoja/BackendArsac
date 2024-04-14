@@ -209,16 +209,19 @@ class AppAsist_API_AsistenciaEst(APIView):
 
     def get(self, request, format=None):
         pIdEstudiante = request.query_params.get("pIdEstudiante")
-
-        if(pIdEstudiante is None):
-            return Response({"Error": "El parametro pIdEstudiante es necesario"})
+        pIdMateria =  request.query_params.get("pIdMateria")
+        pIdCurso = request.query_params.get("pIdCurso")
+        
 
         if pIdEstudiante:
             asistencia = AsistenciaEstudiante.objects.all()
             lista_asistencia = []
+            asistencia = asistencia.order_by('-id')
 
             for dataAsistencia in asistencia:
                 id_estudiante = dataAsistencia.matricula_estudiante.estudiante.id
+                id_materia = dataAsistencia.matricula_estudiante.curso.materia.id
+                id_curso =  dataAsistencia.matricula_estudiante.curso.id
                 soporte_url = None
                 if dataAsistencia.soporte:
                     # Verificar si el campo soporte es un FileField o ImageField
@@ -227,7 +230,9 @@ class AppAsist_API_AsistenciaEst(APIView):
                     else:
                         # Si no es un campo de tipo FileField o ImageField, asumimos que es la ruta de la imagen
                         soporte_url = dataAsistencia.soporte
-                if id_estudiante == int(pIdEstudiante):
+                if (id_estudiante == int(pIdEstudiante) and
+                    id_materia == int(pIdMateria) and
+                    id_curso == int(pIdCurso)):
                     lista_asistencia.append({
                         'id': dataAsistencia.id,
                         'Tipo_asistencia': dataAsistencia.tipo_asistencia,
@@ -238,6 +243,7 @@ class AppAsist_API_AsistenciaEst(APIView):
                         'Curso': dataAsistencia.matricula_estudiante.curso.nombre_curso,
                         'Materia': dataAsistencia.matricula_estudiante.curso.materia.nombre_materia
                     })
+                
             return Response(lista_asistencia)
         else:
             asistencia = AsistenciaEstudiante.objects.all()
