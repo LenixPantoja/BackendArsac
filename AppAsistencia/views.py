@@ -27,6 +27,7 @@ class AppAsist_API_CrearHorario(APIView):
     def post(self, request, format=None):
         try:
             horario = Horario(
+                dia_semana=request.data.get("dia_semana"),
                 tipoHorario=request.data.get("tipoHorario"),
                 hora_inicio=request.data.get("hora_inicio"),
                 hora_fin=request.data.get("hora_fin"),
