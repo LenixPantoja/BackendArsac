@@ -5,7 +5,7 @@ from AppUsuarios.models import Docente, Estudiante
 
 
 class Horario(models.Model):
-    dia_semana = models.CharField(max_length = 100)
+    dia_semana = models.CharField(max_length = 99)
     tipoHorario = models.CharField(max_length=100)
     hora_inicio = models.TimeField()
     hora_fin = models.TimeField()
