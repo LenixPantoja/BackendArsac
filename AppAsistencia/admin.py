@@ -3,9 +3,9 @@ from AppAsistencia.models import Curso ,Horario, Materia, Matricula, Periodo, Ob
 # Register your models here.
 @admin.register(Horario)
 class HorarioAdmin(admin.ModelAdmin):
-    list_filter = ('tipoHorario', 'hora_inicio', 'hora_fin',)
-    list_display = ('tipoHorario', 'hora_inicio', 'hora_fin',)
-    search_fields = ('tipoHorario', 'hora_inicio', 'hora_fin',)
+    list_filter = ('dia_semana', 'tipoHorario', 'hora_inicio', 'hora_fin',)
+    list_display = ('dia_semana','tipoHorario', 'hora_inicio', 'hora_fin',)
+    search_fields = ('dia_semana','tipoHorario', 'hora_inicio', 'hora_fin',)
     ordering = ('tipoHorario',)
     
 @admin.register(Materia)
