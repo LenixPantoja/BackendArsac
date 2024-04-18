@@ -202,7 +202,18 @@ class AppAsist_API_AsistenciaEst(APIView):
                     else:
                         # Si no es un campo de tipo FileField o ImageField, asumimos que es la ruta de la imagen
                         soporte_url = dataAsistencia.soporte
-                        
+                print(id_estudiante == int(pIdEstudiante))
+                print(f"idinternoest: {id_estudiante}", {int(pIdEstudiante)})
+                print(f"idinternoest: {id_estudiante}", {int(pIdEstudiante)})
+
+                print(id_materia == int(pIdMateria))
+                print(f"idinternomater: {id_materia}", {int(pIdMateria)})
+                print(f"idinternomater: {id_materia}", {int(pIdMateria)})
+
+                print(id_curso == int(pIdCurso))      
+                print(f"idinternocurs: {id_curso}",{int(pIdCurso)})
+                print(f"idinternocurs: {id_curso}", {int(pIdCurso)})
+
                 if (id_estudiante == int(pIdEstudiante) and
                     id_materia == int(pIdMateria) and
                     id_curso == int(pIdCurso)):
@@ -211,11 +222,12 @@ class AppAsist_API_AsistenciaEst(APIView):
                         'Tipo_asistencia': dataAsistencia.tipo_asistencia,
                         'Descripcion_asistencia': dataAsistencia.descripcion,
                         'Hora_llegada' : dataAsistencia.hora_llegada,
-                        'id': dataAsistencia.matricula_estudiante.estudiante.id,
+                        'Soporte': soporte_url,
+                        'id_estudiante': dataAsistencia.matricula_estudiante.estudiante.id,
                         'Estudiante': dataAsistencia.matricula_estudiante.estudiante.user.first_name + ' ' + dataAsistencia.matricula_estudiante.estudiante.user.last_name,
-                        'id':dataAsistencia.matricula_estudiante.curso_Materia.curso.id,
+                        'id_curso':dataAsistencia.matricula_estudiante.curso_Materia.curso.id,
                         'Curso': dataAsistencia.matricula_estudiante.curso_Materia.curso.nombre_curso,
-                        'id': dataAsistencia.matricula_estudiante.curso_Materia.materia.id,
+                        'id_materia': dataAsistencia.matricula_estudiante.curso_Materia.materia.id,
                         'Materia': dataAsistencia.matricula_estudiante.curso_Materia.materia.nombre_materia
                     })
                     print(lista_asistencia)
@@ -239,11 +251,12 @@ class AppAsist_API_AsistenciaEst(APIView):
                         'Tipo_asistencia': dataAsistencia.tipo_asistencia,
                         'Descripcion_asistencia': dataAsistencia.descripcion,
                         'Hora_llegada' : dataAsistencia.hora_llegada,
-                        'id': dataAsistencia.matricula_estudiante.estudiante.id,
+                        'Soporte': soporte_url,
+                        'id_estudiante': dataAsistencia.matricula_estudiante.estudiante.id,
                         'Estudiante': dataAsistencia.matricula_estudiante.estudiante.user.first_name + ' ' + dataAsistencia.matricula_estudiante.estudiante.user.last_name,
-                        'id':dataAsistencia.matricula_estudiante.curso_Materia.curso.id,
+                        'id_curso':dataAsistencia.matricula_estudiante.curso_Materia.curso.id,
                         'Curso': dataAsistencia.matricula_estudiante.curso_Materia.curso.nombre_curso,
-                        'id': dataAsistencia.matricula_estudiante.curso_Materia.materia.id,
+                        'id_materia': dataAsistencia.matricula_estudiante.curso_Materia.materia.id,
                         'Materia': dataAsistencia.matricula_estudiante.curso_Materia.materia.nombre_materia
                     })
             return Response(lista_asistencia)
