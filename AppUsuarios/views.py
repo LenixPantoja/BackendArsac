@@ -164,8 +164,9 @@ class AppUser_EstudiantesCursoMateria(APIView):
                     estudiantes_data.append({
                         'id':miMatricula['id'],
                         'Username_Login': mi_estudiante.user.username,
+                        'id_estudiante': mi_estudiante.id,
                         'Nombre_Estudiante': mi_estudiante.user.first_name + ' ' + mi_estudiante.user.last_name,
-                        "Identificacion_Estudiante": cursoMateria.curso.id,
+                        "Identificacion_Estudiante": mi_estudiante.estudiante_numero_Id,
                         "Acceso": mi_estudiante.estudiante_estado,
                         "id_Curso_Estudiante": cursoMateria.curso.id,
                         "Curso_Estudiante": cursoMateria.curso.nombre_curso,
