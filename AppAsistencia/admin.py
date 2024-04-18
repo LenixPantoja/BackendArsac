@@ -1,5 +1,5 @@
 from django.contrib import admin
-from AppAsistencia.models import Curso ,Horario, Materia, Matricula, Periodo, ObservacionesEstudiante, AsistenciaEstudiante
+from AppAsistencia.models import Curso ,Horario, Materia, Matricula, Periodo, ObservacionesEstudiante, AsistenciaEstudiante, CursoMateria
 # Register your models here.
 @admin.register(Horario)
 class HorarioAdmin(admin.ModelAdmin):
@@ -10,8 +10,8 @@ class HorarioAdmin(admin.ModelAdmin):
     
 @admin.register(Materia)
 class MateriaAdmin(admin.ModelAdmin):
-    list_filter = ('nombre_materia', 'docente', 'horario',)
-    list_display = ('nombre_materia', 'docente', 'horario',)
+    list_filter = ('nombre_materia', 'periodo', 'docente', 'horario',)
+    list_display = ('nombre_materia', 'periodo', 'docente', 'horario',)
     search_fields = ('nombre_materia', 'docente__usuario__username',) 
     ordering = ('nombre_materia',) 
 
@@ -24,9 +24,15 @@ class PeriodoAdmin(admin.ModelAdmin):
 
 @admin.register(Curso)
 class CursoAdmin(admin.ModelAdmin):
-    list_display = ('nombre_curso', 'materia', 'periodo', 'curso_created_at', 'curso_updated_at')
-    list_filter = ('periodo', 'materia')
-    search_fields = ('nombre_curso', 'materia__nombre_materia')
+    list_display = ('nombre_curso', 'curso_created_at', 'curso_updated_at',)
+    list_filter = ('nombre_curso',)
+    search_fields = ('nombre_curso',)
+
+@admin.register(CursoMateria)
+class CursoMateriaAdmin(admin.ModelAdmin):
+    list_display = ('curso', 'materia', 'created_at', 'updated_at',)
+    list_filter = ( 'curso', 'materia',)
+    search_fields = ('curso', 'materia',)
 
 
 @admin.register(AsistenciaEstudiante)
@@ -38,9 +44,9 @@ class AsistenciaEstudianteAdmin(admin.ModelAdmin):
 
 @admin.register(Matricula)
 class MatriculaAdmin(admin.ModelAdmin):
-    list_display = ('estudiante', 'curso')
-    search_fields = ('estudiante__nombre', 'curso__nombre_curso')
-    list_filter = ('curso',)
+    list_display = ('estudiante', 'curso_Materia',)
+    search_fields = ('estudiante__nombre', 'curso_Materia',)
+    list_filter = ('curso_Materia',)
 
 @admin.register(ObservacionesEstudiante)
 class ObservacionesEstudianteAdmin(admin.ModelAdmin):
