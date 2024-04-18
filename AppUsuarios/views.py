@@ -154,23 +154,22 @@ class AppUser_EstudiantesCursoMateria(APIView):
             serializers = MatriculaSerializer(matricula, many=True)
             estudiantes_data = []
             for miMatricula in serializers.data:
-                estudiante = Estudiante.objects.get(id = miMatricula['estudiante'])
-                curso = Curso.objects.get(id = miMatricula['curso'])
-                id_materia = curso.materia.id
+                cursoMateria = CursoMateria.objects.get(pk = miMatricula['curso_Materia'])
+                mi_estudiante = Estudiante.objects.get(pk = miMatricula['estudiante'])
                 
-                if id_materia == int(pMateria) and miMatricula['curso'] == int(pCurso):
-                    estudiantes_data.append({
-                        'id':estudiante.id,
-                        'Username_Login':estudiante.user.username,
-                        'Nombre_Estudiante':estudiante.user.first_name + ' ' + estudiante.user.last_name,
-                        'Identificacion_Estudiante':estudiante.estudiante_numero_Id,
-                        'Acceso': estudiante.estudiante_estado,
-                        'id_Curso_Estudiante':curso.id,
-                        'Curso_Estudiante':curso.nombre_curso,
-                        'Id_Materia_Estudiante':curso.materia.id,
-                        'Materia_Estudiante':curso.materia.nombre_materia,
-                        'id_Matricula': miMatricula['id']
-                        })
+                print(cursoMateria.curso.nombre_curso )
+                estudiantes_data.append({
+                    'id':miMatricula['id'],
+                    'Username_Login': mi_estudiante.user.username,
+                    'Nombre_Estudiante': mi_estudiante.user.first_name + ' ' + mi_estudiante.user.last_name,
+                    "Identificacion_Estudiante": cursoMateria.curso.id,
+                    "Acceso": mi_estudiante.estudiante_estado,
+                    "id_Curso_Estudiante": cursoMateria.curso.id,
+                    "Curso_Estudiante": cursoMateria.curso.nombre_curso,
+                    "Id_Materia_Estudiante": cursoMateria.materia.id,
+                    "Materia_Estudiante": cursoMateria.materia.nombre_materia
+                    })
+                
             return Response(estudiantes_data)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

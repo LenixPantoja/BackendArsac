@@ -124,58 +124,29 @@ class AppAsist_API_Curso(APIView):
         pUserDocente = request.query_params.get("pDocente", None)
         
         if pUserDocente is not None:
-            cursos = Curso.objects.all()
-            serializer = CursoSerializer(cursos, many=True)
-            
-            curso_data = []
-            cursos_procesados = set()  # Usar un conjunto para evitar duplicados
-            nombre_docente = ""
-            for miCurso in serializer.data:
-                curso_info = {f"{key}": value for key, value in miCurso.items()}
-                
-                # Verificar si las claves necesarias están presentes en curso_info
-                if 'nombre_curso' not in curso_info or 'materia' not in curso_info or 'periodo' not in curso_info:
-                    continue  # Omitir este curso si falta alguna clave requerida
-                
-                id_materia = curso_info['materia']
-                id_perido = curso_info['periodo']
-                materia = Materia.objects.filter(id=id_materia)
-                periodo = Periodo.objects.filter(id=id_perido)
-                
-                for miMateria in materia:
-                    pass  # No necesitas hacer nada aquí
-                
-                for miPeriodo in periodo:
-                    pass  # Tampoco necesitas hacer nada aquí
-                
-                hora_inicio = miMateria.horario.hora_inicio
+            miCursoMateria = CursoMateria.objects.all()
+            data_curso = []
+            for dataCursoMateria in miCursoMateria:
+                hora_inicio = dataCursoMateria.materia.horario.hora_inicio
                 hora_inicio_format = hora_inicio.strftime("%I:%M:%S %p")
-                hora_fin = miMateria.horario.hora_fin
+                hora_fin = dataCursoMateria.materia.horario.hora_fin
                 hora_fin_format = hora_fin.strftime("%I:%M:%S %p")
-                user_docente = miMateria.docente.user.username
-                nombre_docente = user_docente
-                # Verificar si el docente coincide y si el curso ya se ha procesado
-                curso_key = (curso_info['nombre_curso'], curso_info.get('Docente', ''))  # Utiliza get para manejar la falta de la clave 'Docente'
-                if user_docente == pUserDocente and curso_key not in cursos_procesados:
-                    cursos_procesados.add(curso_key)
-                    curso_data.append({
-                        'id': curso_info['id'],
-                        'nombre_curso': curso_info['nombre_curso'],
-                        'materia': miMateria.nombre_materia,
+
+                usernameDocente = dataCursoMateria.materia.docente.user.username
+                if usernameDocente == pUserDocente:
+                    data_curso.append({
+                        'id': dataCursoMateria.curso.id,
+                        'nombre_curso': dataCursoMateria.curso.nombre_curso,
+                        'materia': dataCursoMateria.materia.nombre_materia,
                         'Hora_Inicio_Clase': hora_inicio_format,
                         'Hora_Fin_Clase': hora_fin_format,
-                        'tipo_horario': miMateria.horario.tipoHorario,
-                        'periodo': miPeriodo.nombre_periodo,
-                        'Docente': nombre_docente  # Utiliza get para manejar la falta de la clave 'Docente'
+                        'Dia': dataCursoMateria.materia.horario.dia_semana,
+                        'tipo_horario': dataCursoMateria.materia.horario.tipoHorario,
+                        'periodo': dataCursoMateria.materia.periodo.nombre_periodo,
+                        'Docente': dataCursoMateria.materia.docente.user.username
                     })
             
-            return Response(curso_data)
-        else:
-            return Response(
-                {"error": "El parámetro pDocente es necesario."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
+            return Response(data_curso)
 class AppAsist_API_AsistenciaEst(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
@@ -231,6 +202,15 @@ class AppAsist_API_AsistenciaEst(APIView):
                     else:
                         # Si no es un campo de tipo FileField o ImageField, asumimos que es la ruta de la imagen
                         soporte_url = dataAsistencia.soporte
+                        
+                print(id_estudiante == int(pIdEstudiante))
+                print(id_estudiante, f"param: {pIdEstudiante}")
+                print(id_materia == int(pIdMateria))
+                print(id_materia, f"param: {pIdMateria}")
+                print(id_curso == int(pIdCurso))
+                print(id_curso, f"param:{pIdCurso}")
+                print("-----------------")
+
                 if (id_estudiante == int(pIdEstudiante) and
                     id_materia == int(pIdMateria) and
                     id_curso == int(pIdCurso)):
@@ -239,12 +219,14 @@ class AppAsist_API_AsistenciaEst(APIView):
                         'Tipo_asistencia': dataAsistencia.tipo_asistencia,
                         'Descripcion_asistencia': dataAsistencia.descripcion,
                         'Hora_llegada' : dataAsistencia.hora_llegada,
-                        'Soporte_imagen': soporte_url,
+                        'id': dataAsistencia.matricula_estudiante.estudiante.id,
                         'Estudiante': dataAsistencia.matricula_estudiante.estudiante.user.first_name + ' ' + dataAsistencia.matricula_estudiante.estudiante.user.last_name,
+                        'id':dataAsistencia.matricula_estudiante.curso.id,
                         'Curso': dataAsistencia.matricula_estudiante.curso.nombre_curso,
+                        'id': dataAsistencia.matricula_estudiante.curso.materia.id,
                         'Materia': dataAsistencia.matricula_estudiante.curso.materia.nombre_materia
                     })
-                
+                    print(lista_asistencia)
             return Response(lista_asistencia)
         else:
             asistencia = AsistenciaEstudiante.objects.all()
@@ -266,8 +248,11 @@ class AppAsist_API_AsistenciaEst(APIView):
                     'Descripcion_asistencia': dataAsistencia.descripcion,
                     'Hora_llegada' : dataAsistencia.hora_llegada,
                     'Soporte_imagen': soporte_url,
+                    'id:est': dataAsistencia.matricula_estudiante.estudiante.id,
                     'Estudiante': dataAsistencia.matricula_estudiante.estudiante.user.first_name + ' ' + dataAsistencia.matricula_estudiante.estudiante.user.last_name,
+                    'id_curs':dataAsistencia.matricula_estudiante.curso.id,
                     'Curso': dataAsistencia.matricula_estudiante.curso.nombre_curso,
+                    'id_mate': dataAsistencia.matricula_estudiante.curso.materia.id,
                     'Materia': dataAsistencia.matricula_estudiante.curso.materia.nombre_materia
                 })
             return Response(lista_asistencia)
@@ -417,8 +402,6 @@ class AppAsist_API_Materias_Docente(APIView):
             for dataMateria in serializer.data:
                 pass
                 miDocente = Docente.objects.get(id = dataMateria["docente"])
-                miHorario =  Horario.objects.get(id = dataMateria["horario"])
-                
                 if pUser == str(miDocente.user.username):
                     horarioDocente.append({
                     "id" : dataMateria["id"],

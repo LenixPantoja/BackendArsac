@@ -5,7 +5,7 @@ from AppUsuarios.models import Docente, Estudiante
 
 
 class Horario(models.Model):
-    dia_semana = models.CharField(max_length = 99)
+    dia_semana = models.CharField(max_length = 100)
     tipoHorario = models.CharField(max_length=100)
     hora_inicio = models.TimeField()
     hora_fin = models.TimeField()
@@ -17,9 +17,18 @@ class Horario(models.Model):
     def __str__(self):
         return str(f"{self.tipoHorario} - {self.hora_inicio} - {self.hora_fin}")
 
+class Periodo(models.Model):
+    nombre_periodo = models.CharField(max_length=100)
+    class Meta:
+        verbose_name = "Periodo"
+        verbose_name_plural = "Periodos"
+
+    def __str__(self):
+        return str(self.nombre_periodo)
 
 class Materia(models.Model):
     nombre_materia = models.CharField(max_length=100)
+    periodo = models.ForeignKey(Periodo, on_delete=models.CASCADE)
     docente = models.ForeignKey(Docente, on_delete=models.CASCADE)
     horario = models.ForeignKey(Horario, on_delete=models.CASCADE)
 
@@ -31,21 +40,8 @@ class Materia(models.Model):
         return str(self.nombre_materia)
 
 
-class Periodo(models.Model):
-    nombre_periodo = models.CharField(max_length=100)
-
-    class Meta:
-        verbose_name = "Periodo"
-        verbose_name_plural = "Periodos"
-
-    def __str__(self):
-        return str(self.nombre_periodo)
-
-
 class Curso(models.Model):
     nombre_curso = models.CharField(max_length=50)
-    materia = models.ForeignKey(Materia, on_delete=models.CASCADE)
-    periodo = models.ForeignKey(Periodo, on_delete=models.CASCADE)
     curso_created_at = models.DateTimeField(auto_now_add=True)
     curso_updated_at = models.DateTimeField(auto_now=True)
 
@@ -54,11 +50,23 @@ class Curso(models.Model):
         verbose_name_plural = "Cursos"
 
     def __str__(self):
-        return str(self.nombre_curso + " | " + self.materia.nombre_materia)
+        return str(self.nombre_curso)
+class CursoMateria(models.Model):
+    curso = models.ForeignKey(Curso, on_delete=models.CASCADE)
+    materia = models.ForeignKey(Materia, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    class Meta:
+        verbose_name = "Curso Materia"
+        verbose_name_plural = "Cursos Materias"
 
+    def __str__(self):
+        return str(str(self.curso.id) + '-' + self.curso.nombre_curso + '-' + str(self.materia.id) + '-' + self.materia.nombre_materia)
+
+    
 class Matricula(models.Model):
     estudiante = models.ForeignKey(Estudiante, on_delete=models.CASCADE)
-    curso = models.ForeignKey(Curso, on_delete=models.CASCADE)
+    curso_Materia = models.ForeignKey(CursoMateria, on_delete=models.CASCADE)
     matricula_created_at = models.DateTimeField(auto_now_add=True)
     matricula_updated_at = models.DateTimeField(auto_now=True)
 
@@ -67,7 +75,7 @@ class Matricula(models.Model):
         verbose_name_plural = "MatriculasEstudiante"
 
     def __str__(self):
-        return str(self.estudiante.user.first_name +" "+self.estudiante.user.last_name + " | " + self.curso.materia.nombre_materia)
+        return str(self.estudiante.user.first_name +" "+self.estudiante.user.last_name + " | " + self.curso_Materia.materia.nombre_materia)
 
 
 class AsistenciaEstudiante(models.Model):
