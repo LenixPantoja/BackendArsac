@@ -192,8 +192,8 @@ class AppAsist_API_AsistenciaEst(APIView):
 
             for dataAsistencia in asistencia:
                 id_estudiante = dataAsistencia.matricula_estudiante.estudiante.id
-                id_materia = dataAsistencia.matricula_estudiante.curso.materia.id
-                id_curso =  dataAsistencia.matricula_estudiante.curso.id
+                id_materia = dataAsistencia.matricula_estudiante.curso_Materia.materia.id
+                id_curso =  dataAsistencia.matricula_estudiante.curso_Materia.curso.id
                 soporte_url = None
                 if dataAsistencia.soporte:
                     # Verificar si el campo soporte es un FileField o ImageField
@@ -203,14 +203,6 @@ class AppAsist_API_AsistenciaEst(APIView):
                         # Si no es un campo de tipo FileField o ImageField, asumimos que es la ruta de la imagen
                         soporte_url = dataAsistencia.soporte
                         
-                print(id_estudiante == int(pIdEstudiante))
-                print(id_estudiante, f"param: {pIdEstudiante}")
-                print(id_materia == int(pIdMateria))
-                print(id_materia, f"param: {pIdMateria}")
-                print(id_curso == int(pIdCurso))
-                print(id_curso, f"param:{pIdCurso}")
-                print("-----------------")
-
                 if (id_estudiante == int(pIdEstudiante) and
                     id_materia == int(pIdMateria) and
                     id_curso == int(pIdCurso)):
@@ -221,10 +213,10 @@ class AppAsist_API_AsistenciaEst(APIView):
                         'Hora_llegada' : dataAsistencia.hora_llegada,
                         'id': dataAsistencia.matricula_estudiante.estudiante.id,
                         'Estudiante': dataAsistencia.matricula_estudiante.estudiante.user.first_name + ' ' + dataAsistencia.matricula_estudiante.estudiante.user.last_name,
-                        'id':dataAsistencia.matricula_estudiante.curso.id,
-                        'Curso': dataAsistencia.matricula_estudiante.curso.nombre_curso,
-                        'id': dataAsistencia.matricula_estudiante.curso.materia.id,
-                        'Materia': dataAsistencia.matricula_estudiante.curso.materia.nombre_materia
+                        'id':dataAsistencia.matricula_estudiante.curso_Materia.curso.id,
+                        'Curso': dataAsistencia.matricula_estudiante.curso_Materia.curso.nombre_curso,
+                        'id': dataAsistencia.matricula_estudiante.curso_Materia.materia.id,
+                        'Materia': dataAsistencia.matricula_estudiante.curso_Materia.materia.nombre_materia
                     })
                     print(lista_asistencia)
             return Response(lista_asistencia)
@@ -243,18 +235,17 @@ class AppAsist_API_AsistenciaEst(APIView):
                         soporte_url = dataAsistencia.soporte
                 
                 lista_asistencia.append({
-                    'id': dataAsistencia.id,
-                    'Tipo_asistencia': dataAsistencia.tipo_asistencia,
-                    'Descripcion_asistencia': dataAsistencia.descripcion,
-                    'Hora_llegada' : dataAsistencia.hora_llegada,
-                    'Soporte_imagen': soporte_url,
-                    'id:est': dataAsistencia.matricula_estudiante.estudiante.id,
-                    'Estudiante': dataAsistencia.matricula_estudiante.estudiante.user.first_name + ' ' + dataAsistencia.matricula_estudiante.estudiante.user.last_name,
-                    'id_curs':dataAsistencia.matricula_estudiante.curso.id,
-                    'Curso': dataAsistencia.matricula_estudiante.curso.nombre_curso,
-                    'id_mate': dataAsistencia.matricula_estudiante.curso.materia.id,
-                    'Materia': dataAsistencia.matricula_estudiante.curso.materia.nombre_materia
-                })
+                        'id': dataAsistencia.id,
+                        'Tipo_asistencia': dataAsistencia.tipo_asistencia,
+                        'Descripcion_asistencia': dataAsistencia.descripcion,
+                        'Hora_llegada' : dataAsistencia.hora_llegada,
+                        'id': dataAsistencia.matricula_estudiante.estudiante.id,
+                        'Estudiante': dataAsistencia.matricula_estudiante.estudiante.user.first_name + ' ' + dataAsistencia.matricula_estudiante.estudiante.user.last_name,
+                        'id':dataAsistencia.matricula_estudiante.curso_Materia.curso.id,
+                        'Curso': dataAsistencia.matricula_estudiante.curso_Materia.curso.nombre_curso,
+                        'id': dataAsistencia.matricula_estudiante.curso_Materia.materia.id,
+                        'Materia': dataAsistencia.matricula_estudiante.curso_Materia.materia.nombre_materia
+                    })
             return Response(lista_asistencia)
             
 class AppAsist_API_ObservacionesEstudiante(APIView):

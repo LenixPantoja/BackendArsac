@@ -94,7 +94,7 @@ class AsistenciaEstudiante(models.Model):
         verbose_name_plural = "AsistenciaEstudiantes"
 
     def __str__(self):
-        return str(self.tipo_asistencia + " | "+ self.matricula_estudiante.curso.nombre_curso + " | "+ self.matricula_estudiante.estudiante.user.first_name + " "+ self.matricula_estudiante.estudiante.user.last_name)
+        return str(self.tipo_asistencia + " | "+ self.matricula_estudiante.curso_Materia.curso.nombre_curso + " | "+ self.matricula_estudiante.estudiante.user.first_name + " "+ self.matricula_estudiante.estudiante.user.last_name)
 
 
 class ObservacionesEstudiante(models.Model):
