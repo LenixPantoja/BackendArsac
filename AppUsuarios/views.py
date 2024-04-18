@@ -157,18 +157,21 @@ class AppUser_EstudiantesCursoMateria(APIView):
                 cursoMateria = CursoMateria.objects.get(pk = miMatricula['curso_Materia'])
                 mi_estudiante = Estudiante.objects.get(pk = miMatricula['estudiante'])
                 
-                print(cursoMateria.curso.nombre_curso )
-                estudiantes_data.append({
-                    'id':miMatricula['id'],
-                    'Username_Login': mi_estudiante.user.username,
-                    'Nombre_Estudiante': mi_estudiante.user.first_name + ' ' + mi_estudiante.user.last_name,
-                    "Identificacion_Estudiante": cursoMateria.curso.id,
-                    "Acceso": mi_estudiante.estudiante_estado,
-                    "id_Curso_Estudiante": cursoMateria.curso.id,
-                    "Curso_Estudiante": cursoMateria.curso.nombre_curso,
-                    "Id_Materia_Estudiante": cursoMateria.materia.id,
-                    "Materia_Estudiante": cursoMateria.materia.nombre_materia
-                    })
+                print(cursoMateria.curso.nombre_curso)
+                miMateria = cursoMateria.materia.id
+                miCurso =  cursoMateria.curso.id
+                if miMateria == int(pMateria) and miCurso == int(pCurso):
+                    estudiantes_data.append({
+                        'id':miMatricula['id'],
+                        'Username_Login': mi_estudiante.user.username,
+                        'Nombre_Estudiante': mi_estudiante.user.first_name + ' ' + mi_estudiante.user.last_name,
+                        "Identificacion_Estudiante": cursoMateria.curso.id,
+                        "Acceso": mi_estudiante.estudiante_estado,
+                        "id_Curso_Estudiante": cursoMateria.curso.id,
+                        "Curso_Estudiante": cursoMateria.curso.nombre_curso,
+                        "Id_Materia_Estudiante": cursoMateria.materia.id,
+                        "Materia_Estudiante": cursoMateria.materia.nombre_materia
+                        })
                 
             return Response(estudiantes_data)
         except Exception as e:
