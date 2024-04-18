@@ -170,7 +170,7 @@ class AppUser_EstudiantesCursoMateria(APIView):
                         "id_Curso_Estudiante": cursoMateria.curso.id,
                         "Curso_Estudiante": cursoMateria.curso.nombre_curso,
                         "Id_Materia_Estudiante": cursoMateria.materia.id,
-                        "Materia_Estudiante": cursoMateria.materia.nombre_materia
+                        "Materia_Estudiante": cursoMateria.materia.nombre_materia,
                         })
                 
             return Response(estudiantes_data)
