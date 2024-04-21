@@ -294,6 +294,7 @@ class AppAsist_API_ObservacionesEstudiante(APIView):
                 id_materia = observacion.asistenciaEst.matricula_estudiante.curso_Materia.materia.id
                 id_curso = observacion.asistenciaEst.matricula_estudiante.curso_Materia.curso.id
 
+                # VALIDACIONES
                 if id_estudiante == int(pIdEstudiante) and id_materia == int(pIdMateria) and id_curso == int(pIdCurso): 
                     lista_observaciones.append({
                         'id': observacion.id,
