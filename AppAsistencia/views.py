@@ -291,19 +291,19 @@ class AppAsist_API_ObservacionesEstudiante(APIView):
 
             for observacion in observacionesEstudiante:
                 id_estudiante = observacion.asistenciaEst.matricula_estudiante.estudiante.id
-                id_materia = observacion.asistenciaEst.matricula_estudiante.curso.materia.id
-                id_curso = observacion.asistenciaEst.matricula_estudiante.curso.id
+                id_materia = observacion.asistenciaEst.matricula_estudiante.curso_Materia.materia.id
+                id_curso = observacion.asistenciaEst.matricula_estudiante.curso_Materia.curso.id
 
                 if id_estudiante == int(pIdEstudiante) and id_materia == int(pIdMateria) and id_curso == int(pIdCurso): 
                     lista_observaciones.append({
                         'id': observacion.id,
                         'id_asistencia' : observacion.asistenciaEst.id,
                         'Descripcion': observacion.observacionEst,
-                        'Curso': observacion.asistenciaEst.matricula_estudiante.curso.nombre_curso,
-                        'Periodo': observacion.asistenciaEst.matricula_estudiante.curso.periodo.nombre_periodo,
+                        'Curso': observacion.asistenciaEst.matricula_estudiante.curso_Materia.curso.nombre_curso,
+                        'Periodo': observacion.asistenciaEst.matricula_estudiante.curso_Materia.materia.periodo.nombre_periodo,
                         'Estudiante': observacion.asistenciaEst.matricula_estudiante.estudiante.user.first_name + " "+ observacion.asistenciaEst.matricula_estudiante.estudiante.user.last_name,
-                        'Materia': observacion.asistenciaEst.matricula_estudiante.curso.materia.nombre_materia,
-                        'Docente': observacion.asistenciaEst.matricula_estudiante.curso.materia.docente.user.first_name + " " + observacion.asistenciaEst.matricula_estudiante.curso.materia.docente.user.last_name,
+                        'Materia': observacion.asistenciaEst.matricula_estudiante.curso_Materia.materia.nombre_materia,
+                        'Docente': observacion.asistenciaEst.matricula_estudiante.curso_Materia.materia.docente.user.first_name + " " + observacion.asistenciaEst.matricula_estudiante.curso_Materia.materia.docente.user.last_name,
                     })
             return Response(lista_observaciones)
         else:
@@ -311,15 +311,15 @@ class AppAsist_API_ObservacionesEstudiante(APIView):
             lista_observaciones = []
             for observacion in observacionesEstudiante:                 
                 lista_observaciones.append({
-                    'id': observacion.id,
-                    'id_asistencia' : observacion.asistenciaEst.id,
-                    'Descripcion': observacion.observacionEst,
-                    'Curso': observacion.asistenciaEst.matricula_estudiante.curso.nombre_curso,
-                    'Periodo': observacion.asistenciaEst.matricula_estudiante.curso.periodo.nombre_periodo,
-                    'Estudiante': observacion.asistenciaEst.matricula_estudiante.estudiante.user.first_name + " "+ observacion.asistenciaEst.matricula_estudiante.estudiante.user.last_name,
-                    'Materia': observacion.asistenciaEst.matricula_estudiante.curso.materia.nombre_materia,
-                    'Docente': observacion.asistenciaEst.matricula_estudiante.curso.materia.docente.user.first_name + " " + observacion.asistenciaEst.matricula_estudiante.curso.materia.docente.user.last_name,
-                })
+                        'id': observacion.id,
+                        'id_asistencia' : observacion.asistenciaEst.id,
+                        'Descripcion': observacion.observacionEst,
+                        'Curso': observacion.asistenciaEst.matricula_estudiante.curso_Materia.curso.nombre_curso,
+                        'Periodo': observacion.asistenciaEst.matricula_estudiante.curso_Materia.materia.periodo.nombre_periodo,
+                        'Estudiante': observacion.asistenciaEst.matricula_estudiante.estudiante.user.first_name + " "+ observacion.asistenciaEst.matricula_estudiante.estudiante.user.last_name,
+                        'Materia': observacion.asistenciaEst.matricula_estudiante.curso_Materia.materia.nombre_materia,
+                        'Docente': observacion.asistenciaEst.matricula_estudiante.curso_Materia.materia.docente.user.first_name + " " + observacion.asistenciaEst.matricula_estudiante.curso_Materia.materia.docente.user.last_name,
+                    })
             return Response(lista_observaciones)
 
     def delete(self, request, pk, format=None):

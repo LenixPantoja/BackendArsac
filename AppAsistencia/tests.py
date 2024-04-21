@@ -81,7 +81,7 @@ def obtener_asistencia_estudiante(url, token):
 url_api = 'https://06e8-8-242-169-8.ngrok-free.app/api/AsistenciaEstudiante/?pIdEstudiante=1&pIdMateria=2&pIdCurso=1'
 
 # Token de autorización
-token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzEzNDg3MDAwLCJpYXQiOjE3MTM0MTUwMDAsImp0aSI6ImE1MjE1MGI0MWU5NjRmYWNiMGY4MWY4MWQ1YmE1MzI5IiwidXNlcl9pZCI6MX0.SCjMXm1CLm5RjkeIUOgSHc6Yco7z9-iLFVLuzl5t2Zc'
+token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzEzNjYxMDc3LCJpYXQiOjE3MTM1ODkwNzcsImp0aSI6IjFkYTZiMWMyNjBlMTQ4ZDM4YjdkM2ExN2ExN2VlMzk0IiwidXNlcl9pZCI6MX0.qgEUiEMhjGTR7IVqKCqx8LMmxTD-OKYpwZUyxLGRPBg'
 
 # Llamar a la función para obtener las observaciones del estudiante
 obtener_asistencia_estudiante(url_api, token)
