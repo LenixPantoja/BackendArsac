@@ -365,7 +365,7 @@ class AppAsist_API_HorarioDocente(APIView):
                 pass
                 miDocente = Docente.objects.get(id = dataCursoMateria.materia.docente.id)
                 miHorario =  Horario.objects.get(id = dataCursoMateria.materia.horario.id)
-                
+                # Valida el usuario ingresado
                 if pUser == str(miDocente.user.username):
                     horarioDocente.append({
                     "Docente": miDocente.user.first_name + " " + miDocente.user.last_name,
