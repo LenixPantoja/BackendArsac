@@ -349,8 +349,8 @@ class AppAsist_API_ObservacionesEstudiante(APIView):
 class AppAsist_API_HorarioDocente(APIView):
     def get(self, request, format=None):
         try:
-            materia = Materia.objects.all()
-            serializer = MateriaSerializer(materia, many = True)
+            cursoMateria = CursoMateria.objects.all()
+            serializer = MateriaSerializer(cursoMateria, many = True)
             horarioDocente = []
             
             pUser = request.query_params.get("pUser", None)
@@ -361,15 +361,17 @@ class AppAsist_API_HorarioDocente(APIView):
                         status=status.HTTP_400_BAD_REQUEST,
                     )
             
-            for dataMateria in serializer.data:
+            for dataCursoMateria in cursoMateria:
                 pass
-                miDocente = Docente.objects.get(id = dataMateria["docente"])
-                miHorario =  Horario.objects.get(id = dataMateria["horario"])
+                miDocente = Docente.objects.get(id = dataCursoMateria.materia.docente.id)
+                miHorario =  Horario.objects.get(id = dataCursoMateria.materia.horario.id)
                 
                 if pUser == str(miDocente.user.username):
                     horarioDocente.append({
                     "Docente": miDocente.user.first_name + " " + miDocente.user.last_name,
-                    "Materia": dataMateria["nombre_materia"],
+                    "Materia": dataCursoMateria.materia.nombre_materia,
+                    "Curso": dataCursoMateria.curso.nombre_curso,
+                    "Dia": miHorario.dia_semana,
                     "Hora_inicio": miHorario.hora_inicio,
                     "Hora_fin": miHorario.hora_fin
                     })
