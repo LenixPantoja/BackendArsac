@@ -369,8 +369,8 @@ class AppAsist_API_HorarioDocente(APIView):
                 if pUser == str(miDocente.user.username):
                     horarioDocente.append({
                     "Docente": miDocente.user.first_name + " " + miDocente.user.last_name,
-                    "Materia": dataCursoMateria.materia.nombre_materia,
-                    "Curso": dataCursoMateria.curso.nombre_curso,
+                    #"Materia": dataCursoMateria.materia.nombre_materia,
+                    #"Curso": dataCursoMateria.curso.nombre_curso,
                     "Dia": miHorario.dia_semana,
                     "Hora_inicio": miHorario.hora_inicio,
                     "Hora_fin": miHorario.hora_fin

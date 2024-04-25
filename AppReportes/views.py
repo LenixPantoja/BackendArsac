@@ -45,10 +45,10 @@ class AppApiReportesPorEstudiante(APIView):
             matricula = Matricula.objects.get(id=dataAsistencia["matricula_estudiante"])
             estudiante = Estudiante.objects.get(id=matricula.estudiante.id)
             cedulaEst =  estudiante.estudiante_numero_Id
-            curso = Curso.objects.get(id=matricula.curso.id)
+            curso = Curso.objects.get(id=matricula.curso_Materia.curso.id)
             idCurso = curso.id
-            idMateria = curso.materia.id
-            periodo = Periodo.objects.get(id=curso.periodo.id)
+            idMateria = matricula.curso_Materia.materia.id
+            periodo = Periodo.objects.get(id=matricula.curso_Materia.materia.periodo.id)
             fecha_objeto = datetime.strptime(dataAsistencia["asistenciaEst_created_at"], '%Y-%m-%dT%H:%M:%S.%fZ')
             fecha_formateada = fecha_objeto.strftime('%Y-%m-%d')
             print(idCurso, idMateria)
@@ -65,9 +65,9 @@ class AppApiReportesPorEstudiante(APIView):
                         contador=contador + 1
                         lista_observaciones.append(f"Observación {contador}:{observ.observacionEst}")
                 #Formateo de fechas
-                hora_inicio = curso.materia.horario.hora_inicio
+                hora_inicio = matricula.curso_Materia.materia.horario.hora_inicio
                 hora_inicio_format = hora_inicio.strftime("%I:%M:%S %p")
-                hora_fin = curso.materia.horario.hora_fin
+                hora_fin = matricula.curso_Materia.materia.horario.hora_fin
                 hora_fin_format = hora_fin.strftime("%I:%M:%S %p")
                 print()
                 dataReporte.append({
@@ -79,9 +79,9 @@ class AppApiReportesPorEstudiante(APIView):
                     "Nombre_estudiante":estudiante.user.first_name + " " + estudiante.user.last_name,
                     "Curso_matriculado": curso.nombre_curso,
                     "Periodo": periodo.nombre_periodo,
-                    "Materia": curso.materia.nombre_materia,
+                    "Materia": matricula.curso_Materia.materia.nombre_materia,
                     "Horario": f"{hora_inicio_format} a {hora_fin_format}",
-                    "Docente": curso.materia.docente.user.first_name + " " + curso.materia.docente.user.last_name,
+                    "Docente": matricula.curso_Materia.materia.docente.user.first_name + " " + matricula.curso_Materia.materia.docente.user.last_name,
                     "Lista_Observaciones": lista_observaciones
                 })
         return Response(dataReporte)
@@ -102,26 +102,33 @@ class AppApiReporteDiario(APIView):
             )
         
         for dataAsistencia in serializer.data:
+            
             matricula = Matricula.objects.get(id=dataAsistencia["matricula_estudiante"])
             estudiante = Estudiante.objects.get(id=matricula.estudiante.id)
             cedulaEst =  estudiante.estudiante_numero_Id
-            curso = Curso.objects.get(id=matricula.curso.id)
-            periodo = Periodo.objects.get(id=curso.periodo.id)
+            curso = Curso.objects.get(id=matricula.curso_Materia.curso.id)
+            periodo = Periodo.objects.get(id=matricula.curso_Materia.materia.periodo.id)
             fecha_objeto = datetime.strptime(dataAsistencia["asistenciaEst_created_at"], '%Y-%m-%dT%H:%M:%S.%fZ')
             observaciones = ObservacionesEstudiante.objects.all()
             fecha_formateada = fecha_objeto.strftime('%Y-%m-%d')
             if (fecha_formateada >= pRango1 and 
                 fecha_formateada <= pRango2 ):
+
+                cant_observaciones = len(observaciones)
+                
                 lista_observaciones = []
                 contador = 0
                 for observ in observaciones:
+                    print("jaasdfasd")
+                    
                     if observ.asistenciaEst.id == dataAsistencia["id"]:
+                        print("paso chavalito")
                         contador=contador + 1
                         lista_observaciones.append(f"Observación {contador}:{observ.observacionEst}")
                     #Formateo de fechas
-                        hora_inicio = curso.materia.horario.hora_inicio
+                        hora_inicio = matricula.curso_Materia.materia.horario.hora_inicio
                         hora_inicio_format = hora_inicio.strftime("%I:%M:%S %p")
-                        hora_fin = curso.materia.horario.hora_fin
+                        hora_fin = matricula.curso_Materia.materia.horario.hora_fin
                         hora_fin_format = hora_fin.strftime("%I:%M:%S %p")
                         print()
                         dataReporte.append({
@@ -134,9 +141,9 @@ class AppApiReporteDiario(APIView):
                             "Cc_estudiante":cedulaEst,
                             "Curso_matriculado": curso.nombre_curso,
                             "Periodo": periodo.nombre_periodo,
-                            "Materia": curso.materia.nombre_materia,
+                            "Materia": matricula.curso_Materia.materia.nombre_materia,
                             "Horario": f"{hora_inicio_format} a {hora_fin_format}",
-                            "Docente": curso.materia.docente.user.first_name + " " + curso.materia.docente.user.last_name,
+                            "Docente": matricula.curso_Materia.materia.docente.user.first_name + " " + matricula.curso_Materia.materia.docente.user.last_name,
                             "Lista_Observaciones": lista_observaciones
                     })
         return Response(dataReporte)
@@ -162,13 +169,14 @@ class AppApiReportePorCurso(APIView):
             )
         # Recorridos
         for dataAsistencia in serializer.data:
+            print(dataAsistencia)
             matricula = Matricula.objects.get(id=dataAsistencia["matricula_estudiante"])
             estudiante = Estudiante.objects.get(id=matricula.estudiante.id)
             cedulaEst =  estudiante.estudiante_numero_Id
-            curso = Curso.objects.get(id=matricula.curso.id)
+            curso = Curso.objects.get(id=matricula.curso_Materia.curso.id)
             idCurso = curso.id
-            idMateria = curso.materia.id
-            periodo = Periodo.objects.get(id=curso.periodo.id)
+            idMateria = matricula.curso_Materia.materia.id
+            periodo = Periodo.objects.get(id=matricula.curso_Materia.materia.periodo.id)
             fecha_objeto = datetime.strptime(dataAsistencia["asistenciaEst_created_at"], '%Y-%m-%dT%H:%M:%S.%fZ')
             fecha_formateada = fecha_objeto.strftime('%Y-%m-%d')
 
@@ -176,6 +184,7 @@ class AppApiReportePorCurso(APIView):
                 fecha_formateada <= pRango2 and
                 pMateria == idMateria and 
                 idCurso == pCurso):
+                print("pasa por aqui chaval")
                 observaciones = ObservacionesEstudiante.objects.all()
                 lista_observaciones = []
                 contador = 0
@@ -184,9 +193,9 @@ class AppApiReportePorCurso(APIView):
                         contador=contador + 1
                         lista_observaciones.append(f"Observación {contador}:{observ.observacionEst}")
                 #Formateo de fechas
-                hora_inicio = curso.materia.horario.hora_inicio
+                hora_inicio = matricula.curso_Materia.materia.horario.hora_inicio
                 hora_inicio_format = hora_inicio.strftime("%I:%M:%S %p")
-                hora_fin = curso.materia.horario.hora_fin
+                hora_fin = matricula.curso_Materia.materia.horario.hora_fin
                 hora_fin_format = hora_fin.strftime("%I:%M:%S %p")
                 print()
                 dataReporte.append({
@@ -199,9 +208,9 @@ class AppApiReportePorCurso(APIView):
                     "Cc_estudiante": cedulaEst,
                     "Curso_matriculado": curso.nombre_curso,
                     "Periodo": periodo.nombre_periodo,
-                    "Materia": curso.materia.nombre_materia,
+                    "Materia": matricula.curso_Materia.materia.nombre_materia,
                     "Horario": f"{hora_inicio_format} a {hora_fin_format}",
-                    "Docente": curso.materia.docente.user.first_name + " " + curso.materia.docente.user.last_name,
+                    "Docente": matricula.curso_Materia.materia.docente.user.first_name + " " + matricula.curso_Materia.materia.docente.user.last_name,
                     "Lista_Observaciones": lista_observaciones
                 })
         return Response(dataReporte)

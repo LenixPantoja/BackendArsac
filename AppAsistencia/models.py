@@ -15,7 +15,7 @@ class Horario(models.Model):
         verbose_name_plural = "Horarios"
 
     def __str__(self):
-        return str(f"{self.tipoHorario} - {self.hora_inicio} - {self.hora_fin}")
+        return str(f"{self.dia_semana} - {self.tipoHorario} - {self.hora_inicio} - {self.hora_fin}")
 
 class Periodo(models.Model):
     nombre_periodo = models.CharField(max_length=100)
