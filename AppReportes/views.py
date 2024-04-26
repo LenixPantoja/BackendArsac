@@ -18,6 +18,15 @@ from AppAsistencia.models import *
 from AppUsuarios.models import *
 from AppAsistencia.serializers import *
 
+# Librerias para generar pdf o excel
+from io import BytesIO
+from reportlab.lib.pagesizes import letter, landscape
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+from reportlab.lib import colors
+from django.http import HttpResponse
+from openpyxl import Workbook
+from reportlab.pdfgen import canvas
+
 # Create your views here.
 
 class AppApiReportesPorEstudiante(APIView):
@@ -87,6 +96,8 @@ class AppApiReportesPorEstudiante(APIView):
         return Response(dataReporte)
     
 class AppApiReporteDiario(APIView):
+    
+    
     def get(self, request, format = None):
         asistencia =  AsistenciaEstudiante.objects.all()
         observaciones = ObservacionesEstudiante.objects.all()
@@ -146,7 +157,70 @@ class AppApiReporteDiario(APIView):
                             "Docente": matricula.curso_Materia.materia.docente.user.first_name + " " + matricula.curso_Materia.materia.docente.user.last_name,
                             "Lista_Observaciones": lista_observaciones
                     })
-        return Response(dataReporte)
+        # Creamos un objeto BytesIO para almacenar el PDF generado
+        buffer = BytesIO()
+        # Creamos un objeto SimpleDocTemplate con el buffer como archivo de destino y tamaño de página oficio
+        pdf = SimpleDocTemplate(buffer, pagesize=landscape(letter))
+
+        # Lista de datos
+        tabla_datos = []
+        # Encabezado de la tabla
+        encabezado = ["Tipo de asistencia", "Descripción", "Hora de llegada",
+                       "Nombre del estudiante", "Cédula del estudiante", "Curso matriculado",
+                       "Materia", "Horario", "Docente", "Lista de Observaciones"]
+
+        tabla_datos.append(encabezado)
+        for item in dataReporte:
+            fila = [
+                #item["id"],
+                item["Tipo_asistencia"],
+                item["Descripcion"],
+                item["Hora_llegada"],
+                #item["FechaCreacion"],
+                item["Nombre_estudiante"],
+                item["Cc_estudiante"],
+                item["Curso_matriculado"],
+                #item["Periodo"],
+                item["Materia"],
+                item["Horario"],
+                item["Docente"],
+                '\n'.join(item["Lista_Observaciones"])  # Convertimos la lista de observaciones a una cadena separada por saltos de línea
+        ]
+            tabla_datos.append(fila)
+        tabla = Table(tabla_datos)
+
+        # Aplicamos estilos a la tabla
+        estilo = TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),  # Color de fondo para el encabezado
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),  # Color de texto para el encabezado
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),  # Alineación centrada para todas las celdas
+            ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),  # Grosor y color de la línea interior de las celdas
+            ('BOX', (0, 0), (-1, -1), 0.25, colors.black),  # Grosor y color del borde de las celdas
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),  # Alineación vertical centrada
+            ('WORDWRAP', (0, 0), (-1, -1), True),  # Ajuste de texto automático
+        ])
+
+        tabla.setStyle(estilo)
+
+        # Agregamos la tabla al documento PDF
+        elementos = []
+        elementos.append(tabla)
+
+        # Construimos el documento PDF
+        pdf.build(elementos)
+
+        # Volvemos al principio del buffer
+        buffer.seek(0)
+
+        # Creamos una respuesta HTTP con el contenido del buffer como archivo adjunto
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="archivo.pdf"'
+
+        # Escribimos el contenido del buffer en la respuesta HTTP
+        response.write(buffer.getvalue())
+
+        return response
+
     
 class AppApiReportePorCurso(APIView):
     def get(self, request, format=None):
