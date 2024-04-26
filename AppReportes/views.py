@@ -95,7 +95,7 @@ class AppApiReportesPorEstudiante(APIView):
                 })
         return Response(dataReporte)
     
-class AppApiReporteDiario(APIView):
+class AppApiReporteDiarioPDF(APIView):
     
     
     def get(self, request, format = None):
@@ -221,7 +221,113 @@ class AppApiReporteDiario(APIView):
 
         return response
 
+class AppApiReporteDiarioXLSX(APIView):
     
+    
+    def get(self, request, format = None):
+        asistencia =  AsistenciaEstudiante.objects.all()
+        observaciones = ObservacionesEstudiante.objects.all()
+        serializer = AsistenciaEstudianteSerializer(asistencia, many=True)
+        pRango1 = request.query_params.get("pRango1", None)
+        pRango2 = request.query_params.get("pRango2", None)
+        dataReporte = []
+
+        if pRango1 is None or pRango2 is None:
+            return Response(
+                {"error": "Parametros incompletos(pRango1, pRango2)"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        
+        for dataAsistencia in serializer.data:
+            
+            matricula = Matricula.objects.get(id=dataAsistencia["matricula_estudiante"])
+            estudiante = Estudiante.objects.get(id=matricula.estudiante.id)
+            cedulaEst =  estudiante.estudiante_numero_Id
+            curso = Curso.objects.get(id=matricula.curso_Materia.curso.id)
+            periodo = Periodo.objects.get(id=matricula.curso_Materia.materia.periodo.id)
+            fecha_objeto = datetime.strptime(dataAsistencia["asistenciaEst_created_at"], '%Y-%m-%dT%H:%M:%S.%fZ')
+            observaciones = ObservacionesEstudiante.objects.all()
+            fecha_formateada = fecha_objeto.strftime('%Y-%m-%d')
+            if (fecha_formateada >= pRango1 and 
+                fecha_formateada <= pRango2 ):
+
+                cant_observaciones = len(observaciones)
+                
+                lista_observaciones = []
+                contador = 0
+                for observ in observaciones:
+                    print("jaasdfasd")
+                    
+                    if observ.asistenciaEst.id == dataAsistencia["id"]:
+                        print("paso chavalito")
+                        contador=contador + 1
+                        lista_observaciones.append(f"Observación {contador}:{observ.observacionEst}")
+                    #Formateo de fechas
+                        hora_inicio = matricula.curso_Materia.materia.horario.hora_inicio
+                        hora_inicio_format = hora_inicio.strftime("%I:%M:%S %p")
+                        hora_fin = matricula.curso_Materia.materia.horario.hora_fin
+                        hora_fin_format = hora_fin.strftime("%I:%M:%S %p")
+                        print()
+                        dataReporte.append({
+                            "id": dataAsistencia["id"],
+                            "Tipo_asistencia": dataAsistencia["tipo_asistencia"],
+                            "Descripcion": dataAsistencia["descripcion"],
+                            "Hora_llegada": dataAsistencia["hora_llegada"],
+                            "FechaCreacion": dataAsistencia["asistenciaEst_created_at"],
+                            "Nombre_estudiante":estudiante.user.first_name + " " + estudiante.user.last_name,
+                            "Cc_estudiante":cedulaEst,
+                            "Curso_matriculado": curso.nombre_curso,
+                            "Periodo": periodo.nombre_periodo,
+                            "Materia": matricula.curso_Materia.materia.nombre_materia,
+                            "Horario": f"{hora_inicio_format} a {hora_fin_format}",
+                            "Docente": matricula.curso_Materia.materia.docente.user.first_name + " " + matricula.curso_Materia.materia.docente.user.last_name,
+                            "Lista_Observaciones": lista_observaciones
+                    })
+         # Creamos un libro de trabajo de Excel
+        wb = Workbook()
+        ws = wb.active
+        # Creamos el encabezado
+        header = ["ID", "Tipo de asistencia", "Descripción", "Hora de llegada", "Fecha de creación",
+                    "Nombre del estudiante", "Cédula del estudiante", "Curso matriculado", "Período",
+                    "Materia", "Horario", "Docente"]
+
+        # Agregamos el encabezado a la primera fila
+        ws.append(header)
+        # Añadimos los datos a las filas
+        for item in dataReporte:
+            # Creamos una fila para cada registro
+            row = [
+                item["id"],
+                item["Tipo_asistencia"],
+                item["Descripcion"],
+                item["Hora_llegada"],
+                item["FechaCreacion"],
+                item["Nombre_estudiante"],
+                item["Cc_estudiante"],
+                item["Curso_matriculado"],
+                item["Periodo"],
+                item["Materia"],
+                item["Horario"],
+                item["Docente"]
+            ]
+            
+            # Agregamos las observaciones en columnas adicionales
+            for i, observacion in enumerate(item["Lista_Observaciones"]):
+                row.append(observacion)
+
+            # Añadimos la fila al libro de trabajo
+            ws.append(row)
+
+        # Creamos la respuesta HTTP
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="archivo.xlsx"'
+
+        # Guardamos el libro de trabajo en la respuesta
+        wb.save(response)
+
+        return response
+
+
 class AppApiReportePorCurso(APIView):
     def get(self, request, format=None):
         asistencia =  AsistenciaEstudiante.objects.all()
