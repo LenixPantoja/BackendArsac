@@ -184,8 +184,8 @@ from rest_framework.response import Response
 from datetime import datetime
 
 class AppUser_InformacionDocente(APIView):
+    
     permission_classes = (permissions.IsAuthenticated,)
-
     def get(self, request, format=None):
         pUser = request.query_params.get("pUser", None)
         dataMatricula = Matricula.objects.all()
