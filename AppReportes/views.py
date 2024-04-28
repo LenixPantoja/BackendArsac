@@ -31,6 +31,8 @@ from reportlab.pdfgen import canvas
 # Create your views here.
 
 class NotificationListAPIView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
     def get(self, request, format=None):
         notifications = Notification.objects.all()
         serializer = NotificationSerializer(notifications, many=True)
@@ -44,6 +46,8 @@ class NotificationListAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class NotificationDetailAPIView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
     def get_object(self, pk):
         try:
             return Notification.objects.get(pk=pk)
