@@ -8,7 +8,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'full_name']
+        fields = ['username', 'full_name', 'is_superuser']
 
 """ Clase serializable de Profesion """
 class ProfesionSerializers(serializers.ModelSerializer):

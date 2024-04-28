@@ -369,8 +369,8 @@ class AppAsist_API_HorarioDocente(APIView):
                 if pUser == str(miDocente.user.username):
                     horarioDocente.append({
                     "Docente": miDocente.user.first_name + " " + miDocente.user.last_name,
-                    #"Materia": dataCursoMateria.materia.nombre_materia,
-                    #"Curso": dataCursoMateria.curso.nombre_curso,
+                    "Materia": dataCursoMateria.materia.nombre_materia,
+                    "Curso": dataCursoMateria.curso.nombre_curso,
                     "Dia": miHorario.dia_semana,
                     "Hora_inicio": miHorario.hora_inicio,
                     "Hora_fin": miHorario.hora_fin
@@ -407,3 +407,136 @@ class AppAsist_API_Materias_Docente(APIView):
             return Response(horarioDocente)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+
+class AppAsist_API_HorarioEstudiante(APIView):
+    def get(self, request, format=None):
+        try:
+            matricula = Matricula.objects.all()
+            horarioEstudiante = []
+            pUser = request.query_params.get("pUser", None)
+                # Parametro de consulta
+            if pUser is None:
+                return Response(
+                    {"error": "El parámetro pUser es necesario."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+            for dataMatricula in matricula:
+                pass
+                miDocente = Docente.objects.get(id = dataMatricula.curso_Materia.materia.docente.id)
+                # Valida el usuario ingresado
+                userEstudiante = dataMatricula.estudiante.user.username
+                if userEstudiante == pUser:
+                    horarioEstudiante.append({
+                        "Docente": miDocente.user.first_name + " " + miDocente.user.last_name,
+                        "Materia": dataMatricula.curso_Materia.materia.nombre_materia,
+                        "Curso": dataMatricula.curso_Materia.curso.nombre_curso,
+                        "Dia": dataMatricula.curso_Materia.materia.horario.dia_semana,
+                        "Hora_inicio": dataMatricula.curso_Materia.materia.horario.hora_inicio,
+                        "Hora_fin": dataMatricula.curso_Materia.materia.horario.hora_fin,
+                        })                
+            return Response(horarioEstudiante)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+class AppAsist_API_Materias_Estudiante(APIView):
+    def get(self, request, format=None):
+        try:
+            matricula = Matricula.objects.all()
+            horarioEstudiante = []
+            
+            pUser = request.query_params.get("pUser", None)
+                # Parametro de consulta
+            if pUser is None:
+                return Response(
+                    {"error": "El parámetro pUser es necesario."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+            
+            for dataMateria in matricula:
+                pass
+                userEstudiante = dataMateria.estudiante.user.username
+                if pUser == userEstudiante:
+                    horarioEstudiante.append({
+                    "id" : dataMateria.id,
+                    "Materia": dataMateria.curso_Materia.materia.nombre_materia
+                    })
+                    print(horarioEstudiante)
+            return Response(horarioEstudiante)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+class AppAsist_ConsultarObs_Estudiante(APIView):
+    def get(self, request, format=None):        
+        pUser = request.query_params.get("pUser")
+        pIdMateria =  request.query_params.get("pIdMateria")
+        pIdCurso = request.query_params.get("pIdCurso")
+        
+        if pUser and pIdMateria and pIdCurso:
+            observacionesEstudiante = ObservacionesEstudiante.objects.all()
+            lista_observaciones = []
+
+            for observacion in observacionesEstudiante:
+                usurioEstudiante = observacion.asistenciaEst.matricula_estudiante.estudiante.user.username
+                id_materia = observacion.asistenciaEst.matricula_estudiante.curso_Materia.materia.id
+                id_curso = observacion.asistenciaEst.matricula_estudiante.curso_Materia.curso.id
+
+                # VALIDACIONES
+                if usurioEstudiante == pUser and id_materia == int(pIdMateria) and id_curso == int(pIdCurso): 
+                    lista_observaciones.append({
+                        'id': observacion.id,
+                        'id_asistencia' : observacion.asistenciaEst.id,
+                        'Descripcion': observacion.observacionEst,
+                        'Curso': observacion.asistenciaEst.matricula_estudiante.curso_Materia.curso.nombre_curso,
+                        'Periodo': observacion.asistenciaEst.matricula_estudiante.curso_Materia.materia.periodo.nombre_periodo,
+                        'Estudiante': observacion.asistenciaEst.matricula_estudiante.estudiante.user.first_name + " "+ observacion.asistenciaEst.matricula_estudiante.estudiante.user.last_name,
+                        'Materia': observacion.asistenciaEst.matricula_estudiante.curso_Materia.materia.nombre_materia,
+                        'Docente': observacion.asistenciaEst.matricula_estudiante.curso_Materia.materia.docente.user.first_name + " " + observacion.asistenciaEst.matricula_estudiante.curso_Materia.materia.docente.user.last_name,
+                    })
+            return Response(lista_observaciones)
+        
+class AppAsist_ConsultarAsist_Estudiante(APIView):
+    
+    def get(self, request, format=None):
+        pUser = request.query_params.get("pUser")
+        pIdMateria =  request.query_params.get("pIdMateria")
+        pIdCurso = request.query_params.get("pIdCurso")
+        
+
+        if pUser:
+            asistencia = AsistenciaEstudiante.objects.all()
+            lista_asistencia = []
+            asistencia = asistencia.order_by('-id')
+
+            for dataAsistencia in asistencia:
+                usuarioEstudiante = dataAsistencia.matricula_estudiante.estudiante.user.username
+                id_materia = dataAsistencia.matricula_estudiante.curso_Materia.materia.id
+                id_curso =  dataAsistencia.matricula_estudiante.curso_Materia.curso.id
+                soporte_url = None
+                if dataAsistencia.soporte:
+                    # Verificar si el campo soporte es un FileField o ImageField
+                    if hasattr(dataAsistencia.soporte, 'url'):
+                        soporte_url = request.build_absolute_uri(dataAsistencia.soporte.url)
+                    else:
+                        # Si no es un campo de tipo FileField o ImageField, asumimos que es la ruta de la imagen
+                        soporte_url = dataAsistencia.soporte
+    
+                if (usuarioEstudiante == pUser and
+                    id_materia == int(pIdMateria) and
+                    id_curso == int(pIdCurso)):
+                    lista_asistencia.append({
+                        "id": dataAsistencia.id,
+                        "Tipo_asistencia": dataAsistencia.tipo_asistencia,
+                        "Descripcion_asistencia": dataAsistencia.descripcion,
+                        "Hora_llegada": dataAsistencia.hora_llegada,
+                        "Soporte": soporte_url,
+                        "id_estudiante": dataAsistencia.matricula_estudiante.estudiante.id,
+                        "Estudiante": dataAsistencia.matricula_estudiante.estudiante.user.first_name + ' ' + dataAsistencia.matricula_estudiante.estudiante.user.last_name,
+                        "id_curso":dataAsistencia.matricula_estudiante.curso_Materia.curso.id,
+                        "Curso": dataAsistencia.matricula_estudiante.curso_Materia.curso.nombre_curso,
+                        "id_materia": dataAsistencia.matricula_estudiante.curso_Materia.materia.id,
+                        "Materia": dataAsistencia.matricula_estudiante.curso_Materia.materia.nombre_materia
+                    })
+                    print(lista_asistencia)
+            return Response(lista_asistencia)
+
