@@ -7,6 +7,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 from rest_framework import generics
 from rest_framework import viewsets
+import datetime
 
 # Importamos los serializadores de App Usuarios
 from AppUsuarios.serializers import *
@@ -177,3 +178,35 @@ class AppUser_EstudiantesCursoMateria(APIView):
             return Response(estudiantes_data)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from datetime import datetime
+
+class AppUser_InformacionDocente(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request, format=None):
+        pUser = request.query_params.get("pUser", None)
+        dataMatricula = Matricula.objects.all()
+        for miMatricula in dataMatricula:
+            usuarioDocente = miMatricula.curso_Materia.materia.docente.user.username
+            
+            if usuarioDocente == pUser:
+                # Obtener la fecha de nacimiento del docente
+                fecha_nac = miMatricula.curso_Materia.materia.docente.docente_fecha_nacim
+                
+                # Calcular la edad
+                fecha_actual = datetime.now()
+                edad = fecha_actual.year - fecha_nac.year - ((fecha_actual.month, fecha_actual.day) < (fecha_nac.month, fecha_nac.day))
+                
+                response_data = [{
+                    "Username": usuarioDocente,
+                    "Profesion": miMatricula.curso_Materia.materia.docente.docente_profesion.nombre_Profesion,
+                    "Edad": edad,
+                    "Identificacion": miMatricula.curso_Materia.materia.docente.docente_numero_Id
+                }]
+                return Response(response_data)
+        
+        # Si no se encuentra ningún docente con el usuario proporcionado
+        return Response({"error": "Usuario no encontrado"}, status=404)
