@@ -17,6 +17,7 @@ from datetime import datetime
 from AppAsistencia.models import *
 from AppUsuarios.models import *
 from AppAsistencia.serializers import *
+from AppReportes.serializers import *
 
 # Librerias para generar pdf o excel
 from io import BytesIO
@@ -29,6 +30,45 @@ from reportlab.pdfgen import canvas
 
 # Create your views here.
 
+class NotificationListAPIView(APIView):
+    def get(self, request, format=None):
+        notifications = Notification.objects.all()
+        serializer = NotificationSerializer(notifications, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        serializer = NotificationSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"Msj":"Notificacion creada exitosamente."}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class NotificationDetailAPIView(APIView):
+    def get_object(self, pk):
+        try:
+            return Notification.objects.get(pk=pk)
+        except Notification.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        notification = self.get_object(pk)
+        serializer = NotificationSerializer(notification)
+        return Response(serializer.data)
+
+    def put(self, request, pk, format=None):
+        notification = self.get_object(pk)
+        serializer = NotificationSerializer(notification, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"Msj":"Se actualizó la notificación exitosamente."})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, format=None):
+        notification = self.get_object(pk)
+        notification.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    
 class AppApiReportesPorEstudiante(APIView):
     def get(self, request, format=None):
         asistencia =  AsistenciaEstudiante.objects.all()

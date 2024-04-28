@@ -3,6 +3,7 @@ from .views import *
 from django.conf import settings
 from django.conf.urls.static import static
 from AppReportes.views import *
+from AppUsuarios.views import *
 
 urlpatterns = [
    # Api para generar reporte de asistencia de estudiantes
@@ -15,6 +16,9 @@ urlpatterns = [
    path("api/reportePorCurso", AppApiReportePorCurso.as_view(), name = "ReportePorCurso"),
    path("api/reportePorCursoPDF", AppApiReportePorCursoPDF.as_view(), name = "ReportePorCursoPDF"),
    path("api/reportePorCursoXLSX", AppApiReportePorCursoXLSX.as_view(), name = "ReportePorCursoXLSX"),
+   path('notify/notifications/', NotificationListAPIView.as_view(), name='notification-list'),
+   path('notify/notifications/<int:pk>/', NotificationDetailAPIView.as_view(), name='notification-detail'),
+
 
 
 ]
