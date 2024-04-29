@@ -26,6 +26,7 @@ urlpatterns = [
    path('api/crearMateria/', AppAsist_Api_CrearMateria.as_view(), name = 'crearMateria'),
    path('api/crearPeriodo/', AppAsist_API_CrearPeriodoAcadem.as_view(), name='crearPeriodo'),
    path('api/crearCurso/', AppAsist_API_Curso.as_view(), name='crearCurso'),
+   path('api/crearCursoEstudiante/', AppAsist_API_Curso_Estudiante.as_view(), name='crearCursoEstudiante'),
    path('api/AsistenciaEstudiante/', AppAsist_API_AsistenciaEst.as_view(), name= "AsistenciaEstudiante"),
    path('api/ConsultarAsistenciaEstudiante/', AppAsist_ConsultarAsist_Estudiante.as_view(), name= "ConsultarAsistenciaEstudiante"),
    path('api/ObservacionesEstudiante/', AppAsist_API_ObservacionesEstudiante.as_view(), name = "ObservacionEstudiante"),

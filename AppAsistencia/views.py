@@ -414,34 +414,34 @@ class AppAsist_API_Materias_Docente(APIView):
         
 
 class AppAsist_API_HorarioEstudiante(APIView):
-    # Obtiene la lista de cursos dado el docente
     def get(self, request, format=None):
-        pUserEstudiante = request.query_params.get("pUser", None)
-        
-        if pUserEstudiante is not None:
+        try:
             matricula = Matricula.objects.all()
-            data_curso = []
-            for dataCursoMateria in matricula:
-                hora_inicio = dataCursoMateria.curso_Materia.materia.horario.hora_inicio
-                hora_inicio_format = hora_inicio.strftime("%I:%M:%S %p")
-                hora_fin = dataCursoMateria.curso_Materia.materia.horario.hora_fin
-                hora_fin_format = hora_fin.strftime("%I:%M:%S %p")
-
-                usernameEstudiante = dataCursoMateria.estudiante.user.username
-                if usernameEstudiante == pUserEstudiante:
-                    data_curso.append({
-                        'id': dataCursoMateria.curso_Materia.curso.id,
-                        'nombre_curso': dataCursoMateria.curso_Materia.curso.nombre_curso,
-                        'materia': dataCursoMateria.curso_Materia.materia.nombre_materia,
-                        'Hora_Inicio_Clase': hora_inicio_format,
-                        'Hora_Fin_Clase': hora_fin_format,
-                        'Dia': dataCursoMateria.curso_Materia.materia.horario.dia_semana,
-                        'tipo_horario': dataCursoMateria.curso_Materia.materia.horario.tipoHorario,
-                        'periodo': dataCursoMateria.curso_Materia.materia.periodo.nombre_periodo,
-                        'Docente': dataCursoMateria.curso_Materia.materia.docente.user.username
-                    })
-            
-            return Response(data_curso)
+            horarioEstudiante = []
+            pUser = request.query_params.get("pUser", None)
+                # Parametro de consulta
+            if pUser is None:
+                return Response(
+                    {"error": "El parámetro pUser es necesario."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+            for dataMatricula in matricula:
+                pass
+                miDocente = Docente.objects.get(id = dataMatricula.curso_Materia.materia.docente.id)
+                # Valida el usuario ingresado
+                userEstudiante = dataMatricula.estudiante.user.username
+                if userEstudiante == pUser:
+                    horarioEstudiante.append({
+                        "Docente": miDocente.user.first_name + " " + miDocente.user.last_name,
+                        "Materia": dataMatricula.curso_Materia.materia.nombre_materia,
+                        "Curso": dataMatricula.curso_Materia.curso.nombre_curso,
+                        "Dia": dataMatricula.curso_Materia.materia.horario.dia_semana,
+                        "Hora_inicio": dataMatricula.curso_Materia.materia.horario.hora_inicio,
+                        "Hora_fin": dataMatricula.curso_Materia.materia.horario.hora_fin,
+                        })                
+            return Response(horarioEstudiante)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
 class AppAsist_API_Materias_Estudiante(APIView):
     def get(self, request, format=None):
@@ -543,4 +543,33 @@ class AppAsist_ConsultarAsist_Estudiante(APIView):
                     })
                     print(lista_asistencia)
             return Response(lista_asistencia)
+        
+class AppAsist_API_Curso_Estudiante(APIView):
+    def get(self, request, format=None):
+        pUserEstudiante = request.query_params.get("pUser", None)
+        
+        if pUserEstudiante is not None:
+            matricula = Matricula.objects.all()
+            data_curso = []
+            for dataCursoMateria in matricula:
+                hora_inicio = dataCursoMateria.curso_Materia.materia.horario.hora_inicio
+                hora_inicio_format = hora_inicio.strftime("%I:%M:%S %p")
+                hora_fin = dataCursoMateria.curso_Materia.materia.horario.hora_fin
+                hora_fin_format = hora_fin.strftime("%I:%M:%S %p")
+
+                usernameEstudiante = dataCursoMateria.estudiante.user.username
+                if usernameEstudiante == pUserEstudiante:
+                    data_curso.append({
+                        'id': dataCursoMateria.curso_Materia.curso.id,
+                        'nombre_curso': dataCursoMateria.curso_Materia.curso.nombre_curso,
+                        'materia': dataCursoMateria.curso_Materia.materia.nombre_materia,
+                        'Hora_Inicio_Clase': hora_inicio_format,
+                        'Hora_Fin_Clase': hora_fin_format,
+                        'Dia': dataCursoMateria.curso_Materia.materia.horario.dia_semana,
+                        'tipo_horario': dataCursoMateria.curso_Materia.materia.horario.tipoHorario,
+                        'periodo': dataCursoMateria.curso_Materia.materia.periodo.nombre_periodo,
+                        'Docente': dataCursoMateria.curso_Materia.materia.docente.user.username
+                    })
+            
+            return Response(data_curso)
 
