@@ -222,6 +222,9 @@ class AppAsist_API_AsistenciaEst(APIView):
                     print(lista_asistencia)
             return Response(lista_asistencia)
         else:
+
+            pUser = request.query_params.get("pUser")
+
             asistencia = AsistenciaEstudiante.objects.all()
             lista_asistencia = []
 
@@ -234,8 +237,9 @@ class AppAsist_API_AsistenciaEst(APIView):
                     else:
                         # Si no es un campo de tipo FileField o ImageField, asumimos que es la ruta de la imagen
                         soporte_url = dataAsistencia.soporte
-                
-                lista_asistencia.append({
+                usuarioDocente =  dataAsistencia.matricula_estudiante.curso_Materia.materia.docente.user.username
+                if usuarioDocente == pUser:
+                    lista_asistencia.append({
                         'id': dataAsistencia.id,
                         'Tipo_asistencia': dataAsistencia.tipo_asistencia,
                         'Descripcion_asistencia': dataAsistencia.descripcion,
