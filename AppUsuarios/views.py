@@ -179,9 +179,6 @@ class AppUser_EstudiantesCursoMateria(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from datetime import datetime
 
 class AppUser_InformacionDocente(APIView):
     
