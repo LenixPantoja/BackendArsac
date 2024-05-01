@@ -12,6 +12,8 @@ from django.http import JsonResponse
 from rest_framework import permissions, status
 from rest_framework.decorators import api_view, permission_classes
 from django.conf import settings
+from datetime import datetime
+
 
 from dateutil.parser import isoparse
 
@@ -473,6 +475,8 @@ class AppAsist_API_Materias_Estudiante(APIView):
 class AppAsist_ConsultarObs_Estudiante(APIView):
     def get(self, request, format=None):        
         pUser = request.query_params.get("pUser")
+        pRango1 = request.query_params.get("pRango1")
+        pRango2 = request.query_params.get("pRango2")
         pIdMateria =  request.query_params.get("pIdMateria")
         pIdCurso = request.query_params.get("pIdCurso")
         
@@ -484,12 +488,19 @@ class AppAsist_ConsultarObs_Estudiante(APIView):
                 usurioEstudiante = observacion.asistenciaEst.matricula_estudiante.estudiante.user.username
                 id_materia = observacion.asistenciaEst.matricula_estudiante.curso_Materia.materia.id
                 id_curso = observacion.asistenciaEst.matricula_estudiante.curso_Materia.curso.id
-
+                fecha_creacion = observacion.observacion_created_at
+                fecha_formateada = fecha_creacion.strftime('%Y-%m-%d')
                 # VALIDACIONES
-                if usurioEstudiante == pUser and id_materia == int(pIdMateria) and id_curso == int(pIdCurso): 
+                if (usurioEstudiante == pUser and 
+                    id_materia == int(pIdMateria) and 
+                    id_curso == int(pIdCurso) and 
+                    fecha_formateada >= pRango1 and
+                    fecha_formateada <= pRango2):
+                    print(fecha_formateada)
                     lista_observaciones.append({
                         'id': observacion.id,
                         'id_asistencia' : observacion.asistenciaEst.id,
+                        'Fecha_creacion_obs': fecha_formateada,
                         'Descripcion': observacion.observacionEst,
                         'Curso': observacion.asistenciaEst.matricula_estudiante.curso_Materia.curso.nombre_curso,
                         'Periodo': observacion.asistenciaEst.matricula_estudiante.curso_Materia.materia.periodo.nombre_periodo,
@@ -503,6 +514,8 @@ class AppAsist_ConsultarAsist_Estudiante(APIView):
     
     def get(self, request, format=None):
         pUser = request.query_params.get("pUser")
+        pRango1 = request.query_params.get("pRango1")
+        pRango2 = request.query_params.get("pRango2")
         pIdMateria =  request.query_params.get("pIdMateria")
         pIdCurso = request.query_params.get("pIdCurso")
         
@@ -516,6 +529,9 @@ class AppAsist_ConsultarAsist_Estudiante(APIView):
                 usuarioEstudiante = dataAsistencia.matricula_estudiante.estudiante.user.username
                 id_materia = dataAsistencia.matricula_estudiante.curso_Materia.materia.id
                 id_curso =  dataAsistencia.matricula_estudiante.curso_Materia.curso.id
+                fecha_creacion = dataAsistencia.asistenciaEst_created_at
+                fecha_formateada = fecha_creacion.strftime('%Y-%m-%d')
+
                 soporte_url = None
                 if dataAsistencia.soporte:
                     # Verificar si el campo soporte es un FileField o ImageField
@@ -527,10 +543,13 @@ class AppAsist_ConsultarAsist_Estudiante(APIView):
     
                 if (usuarioEstudiante == pUser and
                     id_materia == int(pIdMateria) and
-                    id_curso == int(pIdCurso)):
+                    id_curso == int(pIdCurso) and
+                    fecha_formateada >= pRango1 and
+                    fecha_formateada <= pRango2):
                     lista_asistencia.append({
                         "id": dataAsistencia.id,
                         "Tipo_asistencia": dataAsistencia.tipo_asistencia,
+                        'Fecha_creacion_asist': fecha_formateada,
                         "Descripcion_asistencia": dataAsistencia.descripcion,
                         "Hora_llegada": dataAsistencia.hora_llegada,
                         "Soporte": soporte_url,
