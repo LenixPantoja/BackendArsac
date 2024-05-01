@@ -545,6 +545,7 @@ class AppAsist_ConsultarAsist_Estudiante(APIView):
             return Response(lista_asistencia)
         
 class AppAsist_API_Curso_Estudiante(APIView):
+    
     def get(self, request, format=None):
         pUserEstudiante = request.query_params.get("pUser", None)
         
