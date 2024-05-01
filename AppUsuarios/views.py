@@ -191,7 +191,7 @@ class AppUser_InformacionDocente(APIView):
         dataMatricula = Matricula.objects.all()
         for miMatricula in dataMatricula:
             usuarioDocente = miMatricula.curso_Materia.materia.docente.user.username
-            
+            usuarioEstudiante = miMatricula.estudiante.user.username 
             if usuarioDocente == pUser:
                 # Obtener la fecha de nacimiento del docente
                 fecha_nac = miMatricula.curso_Materia.materia.docente.docente_fecha_nacim
@@ -202,11 +202,27 @@ class AppUser_InformacionDocente(APIView):
                 
                 response_data = [{
                     "Username": usuarioDocente,
+                    "Perfil": "Docente | admin",
                     "Profesion": miMatricula.curso_Materia.materia.docente.docente_profesion.nombre_Profesion,
                     "Edad": edad,
                     "Identificacion": miMatricula.curso_Materia.materia.docente.docente_numero_Id
                 }]
                 return Response(response_data)
-        
+            
+            elif usuarioEstudiante == pUser:
+                # Obtener la fecha de nacimiento del docente
+                fecha_nac = miMatricula.estudiante.estudiante_fecha_nac
+                
+                # Calcular la edad
+                fecha_actual = datetime.now()
+                edad = fecha_actual.year - fecha_nac.year - ((fecha_actual.month, fecha_actual.day) < (fecha_nac.month, fecha_nac.day))
+                
+                response_data = [{
+                    "Username": usuarioEstudiante,
+                    "Perfil": "Estudiante",
+                    "Edad": edad,
+                    "Identificacion": miMatricula.estudiante.estudiante_numero_Id
+                }]
+                return Response(response_data)
         # Si no se encuentra ningún docente con el usuario proporcionado
         return Response({"error": "Usuario no encontrado"}, status=404)

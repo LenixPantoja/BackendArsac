@@ -21,6 +21,6 @@ urlpatterns = [
     # Api para buscar un estudiante dado el numero de docuemento
     path('api/Estudiantes/<str:estudiante_numero_Id>/', AppUser_Estudiante_ApiView.as_view()),
     # Api para obtener la información del docente
-    path('profile/InformationDocente', AppUser_InformacionDocente.as_view(), name = 'Api-TeacherInformation'),
+    path('profile/InformationProfile', AppUser_InformacionDocente.as_view(), name = 'Api-TeacherInformation'),
 
 ]
