@@ -17,6 +17,7 @@ urlpatterns = [
    path("api/reportePorCursoPDF", AppApiReportePorCursoPDF.as_view(), name = "ReportePorCursoPDF"),
    path("api/reportePorCursoXLSX", AppApiReportePorCursoXLSX.as_view(), name = "ReportePorCursoXLSX"),
    path('notify/notifications/', NotificationListAPIView.as_view(), name='notification-list'),
+   path('grafica/dataGraficasEstadisticas', AppApiGraficasEstadisticas.as_view(), name='grafica_barras'),
    path('notify/notifications/<int:pk>/', NotificationDetailAPIView.as_view(), name='notification-detail'),
 
 
