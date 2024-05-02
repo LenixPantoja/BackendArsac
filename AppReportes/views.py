@@ -1,3 +1,4 @@
+from collections import defaultdict
 from django.shortcuts import get_object_or_404, render
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -27,6 +28,16 @@ from reportlab.lib import colors
 from django.http import HttpResponse
 from openpyxl import Workbook
 from reportlab.pdfgen import canvas
+
+# Librerias para graficas
+
+from matplotlib.backends.backend_pdf import PdfPages
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.backends.backend_pdf import PdfPages
+import matplotlib.pyplot as plt
+import matplotlib.backends.backend_pdf as pdf
+from io import BytesIO
 
 # Create your views here.
 
@@ -1004,3 +1015,150 @@ class AppApiReportePorCursoXLSX(APIView):
         wb.save(response)
 
         return response
+
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+class AppApiGraficasEstadisticas(APIView):
+    
+    def get(self, request, format=None):
+        asistencia =  AsistenciaEstudiante.objects.all()
+        observaciones = ObservacionesEstudiante.objects.all()
+        serializer = AsistenciaEstudianteSerializer(asistencia, many=True)
+        #Parametros para obtener el reporte filtrado.
+        pUser = request.query_params.get("pUser", None)
+        pTipoGrafica = request.query_params.get("pTipoGrafica", None)
+        
+        dataReporte = []
+        mostrarGrafia = False
+        # Parametro de consulta
+        if pUser is None:
+            return Response(
+                {"error": "Parametros incompletos(pCurso, pMateria, pRango1, pRango2, pUser)"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        # Recorridos
+        for dataAsistencia in serializer.data:
+            
+            matricula = Matricula.objects.get(id=dataAsistencia["matricula_estudiante"])
+            estudiante = Estudiante.objects.get(id=matricula.estudiante.id)
+            cedulaEst =  estudiante.estudiante_numero_Id
+            curso = Curso.objects.get(id=matricula.curso_Materia.curso.id)
+            periodo = Periodo.objects.get(id=matricula.curso_Materia.materia.periodo.id)
+            fecha_objeto = datetime.strptime(dataAsistencia["asistenciaEst_created_at"], '%Y-%m-%dT%H:%M:%S.%fZ')
+            fecha_formateada = fecha_objeto.strftime('%Y-%m-%d')
+            usuarioDocente = matricula.curso_Materia.materia.docente.user.username
+            
+            mostrarGrafia = matricula.curso_Materia.materia.docente.docente_estado
+            if (usuarioDocente == pUser):
+
+                observaciones = ObservacionesEstudiante.objects.all()
+                lista_observaciones = []
+                contador = 0
+                for observ in observaciones:
+                    if observ.asistenciaEst.id == dataAsistencia["id"]:
+                        contador=contador + 1
+                        lista_observaciones.append(f"Observación {contador}:{observ.observacionEst}")
+
+                #Formateo de fechas
+                hora_inicio = matricula.curso_Materia.materia.horario.hora_inicio
+                hora_inicio_format = hora_inicio.strftime("%I:%M:%S %p")
+                hora_fin = matricula.curso_Materia.materia.horario.hora_fin
+                hora_fin_format = hora_fin.strftime("%I:%M:%S %p")
+                print()
+                dataReporte.append({
+                    "id": dataAsistencia["id"],
+                    "id_curso": matricula.curso_Materia.curso.id,
+                    "Tipo_asistencia": dataAsistencia["tipo_asistencia"],
+                    "Curso_matriculado": curso.nombre_curso,
+                    "id_Materia": matricula.curso_Materia.materia.id,
+                    "Materia": matricula.curso_Materia.materia.nombre_materia,
+                    "Docente": matricula.curso_Materia.materia.docente.user.first_name + " " + matricula.curso_Materia.materia.docente.user.last_name,
+                })
+        if mostrarGrafia:
+            if pTipoGrafica == "BARRAS":
+                # GENERAMOS LA GRAFICA POR SERVICIO 
+                buffer = BytesIO()
+                with pdf.PdfPages(buffer) as export_pdf:
+                    plt.figure(figsize=(10, 7))
+                    materias = [d["Materia"] for d in dataReporte]
+                    cantidades = [materias.count(m) for m in set(materias)]
+                    plt.bar(range(len(cantidades)), cantidades, tick_label=list(set(materias)))
+                    plt.xlabel('Materia')
+                    plt.ylabel('Cantidad de Asistencias Presentes')
+                    plt.title('Asistencias Presentes por Materia')
+                    plt.xticks(rotation=10, ha='right')
+                    export_pdf.savefig()
+                    plt.close()
+                
+                # Obtener el contenido del buffer y crear una respuesta HTTP con el PDF adjunto
+                buffer.seek(0)
+                response = HttpResponse(buffer, content_type='application/pdf')
+                response['Content-Disposition'] = 'attachment; filename="grafico_barras.pdf"'
+                return response
+            elif pTipoGrafica == "PASTEL":
+
+                # Guardar el gráfico en un buffer de memoria
+                buffer = BytesIO()
+                with pdf.PdfPages(buffer) as export_pdf:
+                    plt.figure(figsize=(10, 7))
+                    plt.subplot(2, 2, 2)
+                    materias = [d["Materia"] for d in dataReporte]
+                    cantidades = [materias.count(m) for m in set(materias)]
+                    plt.pie(cantidades, labels=list(set(materias)), autopct='%1.1f%%', startangle=140)
+                    plt.title('Distribución de Asistencias Presentes por Materia')
+                    plt.axis('equal')
+                    export_pdf.savefig()
+                    plt.close()
+                
+                # Obtener el contenido del buffer y crear una respuesta HTTP con el PDF adjunto
+                buffer.seek(0)
+                response = HttpResponse(buffer, content_type='application/pdf')
+                response['Content-Disposition'] = 'attachment; filename="grafico_pastel.pdf"'
+                return response
+            
+            elif pTipoGrafica == "BARRASGRUPADAS":
+
+                buffer = BytesIO()
+                with pdf.PdfPages(buffer) as export_pdf:
+                    plt.figure(figsize=(10, 7))
+                    cursos = [d["Curso_matriculado"] for d in dataReporte]
+                    cantidades_curso = [cursos.count(c) for c in set(cursos)]
+                    plt.subplot(2, 2, 3)
+                    plt.bar(range(len(cantidades_curso)), cantidades_curso, tick_label=list(set(cursos)))
+                    plt.xlabel('Curso')
+                    plt.ylabel('Cantidad de Asistencias Presentes')
+                    plt.title('Asistencias Presentes por Curso')
+                    plt.xticks(rotation=45, ha='right')
+                    export_pdf.savefig()
+                    plt.close()
+
+                # Obtener el contenido del buffer y crear una respuesta HTTP con el PDF adjunto
+                buffer.seek(0)
+                response = HttpResponse(buffer, content_type='application/pdf')
+                response['Content-Disposition'] = 'attachment; filename="grafico_Barras_Agrupadas.pdf"'
+                return response
+            
+            elif pTipoGrafica == "DISPERSION":
+                buffer = BytesIO()
+
+                with pdf.PdfPages(buffer) as export_pdf:
+                    materias = [d["Materia"] for d in dataReporte]
+                    cantidades = [materias.count(m) for m in set(materias)]
+                    plt.figure(figsize=(10, 7))
+                    plt.subplot(2, 2, 4)
+                    plt.scatter(range(len(cantidades)), cantidades)
+                    plt.xlabel('Índice de Materia')
+                    plt.ylabel('Cantidad de Asistencias Presentes')
+                    plt.title('Relación entre Materia y Asistencias Presentes')
+                    export_pdf.savefig()
+                    plt.close()
+
+                # Obtener el contenido del buffer y crear una respuesta HTTP con el PDF adjunto
+                buffer.seek(0)
+                response = HttpResponse(buffer, content_type='application/pdf')
+                response['Content-Disposition'] = 'attachment; filename="grafico_Dispersion.pdf"'
+                return response
+        else:
+            return Response(status=status.HTTP_203_NON_AUTHORITATIVE_INFORMATION)
+            

@@ -223,3 +223,5 @@ class AppUser_InformacionDocente(APIView):
                 return Response(response_data)
         # Si no se encuentra ningún docente con el usuario proporcionado
         return Response({"error": "Usuario no encontrado"}, status=404)
+    
+
