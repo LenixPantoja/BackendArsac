@@ -180,7 +180,13 @@ class AppAsist_API_AsistenciaEst(APIView):
             # Aquí puedes realizar otras operaciones o validaciones necesarias
 
             asistencia_estudiante.save()
-            return Response({"msg": "Se ha creado la asistencia"}, status=status.HTTP_201_CREATED)
+            return Response(
+                        {
+                            "msg": "Se ha creado la asistencia",
+                            "NombreEstudiante": matricula.estudiante.user.first_name + " " + matricula.estudiante.user.last_name
+                        },status=status.HTTP_201_CREATED
+                    )
+
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
