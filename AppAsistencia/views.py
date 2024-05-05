@@ -1,3 +1,4 @@
+import base64
 from urllib import request
 from django.shortcuts import get_object_or_404, render
 from rest_framework.response import Response
@@ -151,35 +152,37 @@ class AppAsist_API_Curso(APIView):
             return Response(data_curso)
 class AppAsist_API_AsistenciaEst(APIView):
     permission_classes = (permissions.IsAuthenticated,)
-
     def post(self, request, format=None):
         try:
-            serializer = AsistenciaEstudianteSerializer(data=request.data)
-            if serializer.is_valid():
-                
-                
-                    dataAsisEstudiante = request.data
-                    
-                    matricula = Matricula.objects.get(id=dataAsisEstudiante["matricula_estudiante"])
+            matricula = Matricula.objects.get(id=request.data["matricula_estudiante"])
 
-                    asistenciaEstudiante = AsistenciaEstudiante(
-                        tipo_asistencia=dataAsisEstudiante["tipo_asistencia"],
-                        descripcion=dataAsisEstudiante["descripcion"],
-                        hora_llegada=dataAsisEstudiante["hora_llegada"],
-                        soporte=dataAsisEstudiante["soporte"],
-                        matricula_estudiante = matricula
-                    )
-                    asistenciaEstudiante.save()
-                    return Response(
-                        {
-                            "msg": "Se ha creado la asistencia",
-                            "NombreEstudiante": matricula.estudiante.user.first_name + " " + matricula.estudiante.user.last_name
-                        }
-                    )
-            else:
-                return Response({"Error":serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+            tipo_asistencia = request.data.get("tipo_asistencia")
+            descripcion = request.data.get("descripcion")
+            hora_llegada = request.data.get("hora_llegada")
+            soporte_base64 = request.data.get("soporte")
+            matricula_estudiante = matricula
+
+
+            asistencia_estudiante = AsistenciaEstudiante(
+                tipo_asistencia=tipo_asistencia,
+                descripcion=descripcion,
+                hora_llegada=hora_llegada,
+                matricula_estudiante = matricula
+            )
+            if soporte_base64:
+                filename = f"soporte_{asistencia_estudiante.id}.jpg"
+                file_path = os.path.join(settings.MEDIA_ROOT, 'imageSoportes', filename)
+                with open(file_path, 'wb') as f:
+                    f.write(base64.b64decode(soporte_base64))
+                asistencia_estudiante.soporte = file_path
+
+            # Aquí puedes realizar otras operaciones o validaciones necesarias
+
+            asistencia_estudiante.save()
+            return Response({"msg": "Se ha creado la asistencia"}, status=status.HTTP_201_CREATED)
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_200_OK)
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, format=None):
         pIdEstudiante = request.query_params.get("pIdEstudiante")
@@ -224,6 +227,7 @@ class AppAsist_API_AsistenciaEst(APIView):
                     print(lista_asistencia)
             return Response(lista_asistencia)
         else:
+        
 
             pUser = request.query_params.get("pUser")
 
@@ -255,7 +259,9 @@ class AppAsist_API_AsistenciaEst(APIView):
                         'Materia': dataAsistencia.matricula_estudiante.curso_Materia.materia.nombre_materia
                     })
             return Response(lista_asistencia)
-            
+        
+    
+        
 class AppAsist_API_ObservacionesEstudiante(APIView):
 
     permission_classes = (permissions.IsAuthenticated,)
