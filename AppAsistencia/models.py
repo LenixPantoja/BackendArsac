@@ -2,7 +2,8 @@ from django.db import models
 from AppUsuarios.models import Docente, Estudiante
 
 # Create your models here.
-
+import os
+from django.db import models
 
 class Horario(models.Model):
     dia_semana = models.CharField(max_length = 100)
@@ -77,7 +78,7 @@ class Matricula(models.Model):
     def __str__(self):
         return str(self.estudiante.user.first_name +" "+self.estudiante.user.last_name + " | " + self.curso_Materia.materia.nombre_materia)
 
-
+""" 
 class AsistenciaEstudiante(models.Model):
     tipo_asistencia = models.CharField(max_length=100)
     descripcion = models.TextField(null=True, default="Sin registro")
@@ -95,8 +96,23 @@ class AsistenciaEstudiante(models.Model):
 
     def __str__(self):
         return str(self.tipo_asistencia + " | "+ self.matricula_estudiante.curso_Materia.curso.nombre_curso + " | "+ self.matricula_estudiante.estudiante.user.first_name + " "+ self.matricula_estudiante.estudiante.user.last_name)
+ """
+def soporte_file_path(instance, filename):
+    # Retorna la ruta del archivo para la imagen de soporte
+    return os.path.join('imageSoportes', filename)
 
+class AsistenciaEstudiante(models.Model):
+    tipo_asistencia = models.CharField(max_length=100)
+    descripcion = models.TextField(null=True, default="Sin registro")
+    hora_llegada = models.DateTimeField()
+    soporte = models.ImageField(upload_to=soporte_file_path, null=True)  # Campo para almacenar la imagen
+    matricula_estudiante = models.ForeignKey(Matricula, on_delete=models.CASCADE)
+    asistenciaEst_created_at = models.DateTimeField(auto_now_add=True)
+    asistenciaEst_updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        verbose_name = "AsistenciaEstudiante"
+        verbose_name_plural = "AsistenciaEstudiantes"
 class ObservacionesEstudiante(models.Model):
     asistenciaEst = models.ForeignKey(AsistenciaEstudiante, on_delete=models.CASCADE)
     observacionEst = models.TextField()
