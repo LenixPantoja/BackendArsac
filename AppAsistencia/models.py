@@ -38,7 +38,7 @@ class Materia(models.Model):
         verbose_name_plural = "Materias"
 
     def __str__(self):
-        return str(self.nombre_materia)
+        return str(self.nombre_materia + ' | '+ str(self.horario))
 
 
 class Curso(models.Model):
